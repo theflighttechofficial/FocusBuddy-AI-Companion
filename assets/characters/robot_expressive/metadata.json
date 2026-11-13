@@ -1,0 +1,111 @@
+{
+  "id": "robot_expressive",
+  "display_name": "Robot (Quaternius)",
+  "default_name": "Pixel",
+  "emoji": "\ud83e\udd16",
+  "kind": "biped",
+  "species": "robot",
+  "personality": "robot",
+  "tagline": "Artist-made reference asset: 14 animation clips and facial morph targets.",
+  "traits": [
+    "Precise",
+    "Cheerful",
+    "Mechanical"
+  ],
+  "production": true,
+  "production_note": "Artist-created low-poly robot (Quaternius 'RobotExpressive', CC0): skeleton, rigid + skinned parts, 14 clips (Idle, Walking, Running, Jump, Wave, Dance ...) and Angry / Surprised / Sad morph targets. Used to validate clips, root motion, morph faces and rigid node meshes.",
+  "license": "CC0 1.0 \u2014 model by Tom\u00e1s Laulh\u00e9 (Quaternius), modifications by Don McCurdy. See LICENSE.md.",
+  "palette": {
+    "main": "#E8B04A",
+    "shade": "#B27F22",
+    "light": "#F4E1B4",
+    "outline": "#4A3412",
+    "accent": "#5C5C55",
+    "extra": "#202020"
+  },
+  "bone_map": {
+    "Bone": "Root",
+    "Hips": "Pelvis",
+    "Abdomen": "Spine",
+    "Torso": "Chest",
+    "Neck": "Neck",
+    "Head": "Head",
+    "UpperArm.L": "LeftUpperArm",
+    "LowerArm.L": "LeftLowerArm",
+    "Palm2.L": "LeftHand",
+    "UpperArm.R": "RightUpperArm",
+    "LowerArm.R": "RightLowerArm",
+    "Palm2.R": "RightHand",
+    "UpperLeg.L": "LeftUpperLeg",
+    "LowerLeg.L": "LeftLowerLeg",
+    "Foot.L": "LeftFoot",
+    "UpperLeg.R": "RightUpperLeg",
+    "LowerLeg.R": "RightLowerLeg",
+    "Foot.R": "RightFoot"
+  },
+  "materials": {
+    "Grey": "plastic",
+    "Main": "plastic",
+    "Black": "plastic"
+  },
+  "face": {
+    "mode": "morph"
+  },
+  "morphs": {
+    "angry": "Angry",
+    "surprised": "Surprised",
+    "sad": "Sad"
+  },
+  "clips": {
+    "idle": "Idle",
+    "walk": "Walking",
+    "run": "Running",
+    "jump": "Jump",
+    "sit": "Sitting",
+    "stand": "Standing",
+    "wave": "Wave",
+    "celebrate": "Dance",
+    "yes": "Yes",
+    "no": "No",
+    "thumbs_up": "ThumbsUp",
+    "angry": "Punch",
+    "death": "Death"
+  },
+  "clip_settings": {
+    "Sitting": {
+      "loop": false
+    },
+    "Standing": {
+      "loop": false
+    },
+    "Jump": {
+      "loop": false
+    },
+    "Death": {
+      "loop": false
+    },
+    "Punch": {
+      "loop": false,
+      "mask": "upper"
+    },
+    "Wave": {
+      "mask": "upper"
+    },
+    "Yes": {
+      "mask": "upper"
+    },
+    "No": {
+      "mask": "upper"
+    },
+    "ThumbsUp": {
+      "mask": "upper"
+    }
+  },
+  "transitions": {
+    "default": 0.25,
+    "idle->loco": 0.25,
+    "loco->idle": 0.3
+  },
+  "root_motion": "HYBRID",
+  "reference": true
+}

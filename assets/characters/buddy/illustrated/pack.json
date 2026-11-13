@@ -1,0 +1,421 @@
+{
+ "version": 1,
+ "id": "buddy",
+ "kind": "biped",
+ "stand_height": 0.8,
+ "source": "art/sheets/boy.webp",
+ "license": "Character art provided by the FocusBuddy owner; cut out and packed by tools/build_illustrated_packs.py.",
+ "frames": {
+  "front": {
+   "file": "frames/front.webp",
+   "facing": 0,
+   "h": 1.0,
+   "w": 0.3947,
+   "cx": 0.4944,
+   "head": [
+    0.495,
+    0.1332
+   ]
+  },
+  "back": {
+   "file": "frames/back.webp",
+   "facing": 0,
+   "h": 0.9958,
+   "w": 0.4057,
+   "cx": 0.4926,
+   "head": [
+    0.4911,
+    0.1253
+   ]
+  },
+  "left": {
+   "file": "frames/left.webp",
+   "facing": -1,
+   "h": 0.9901,
+   "w": 0.3529,
+   "cx": 0.4001,
+   "head": [
+    0.2164,
+    0.1306
+   ]
+  },
+  "right": {
+   "file": "frames/right.webp",
+   "facing": 1,
+   "h": 0.9817,
+   "w": 0.3448,
+   "cx": 0.6206,
+   "head": [
+    0.8092,
+    0.1254
+   ]
+  },
+  "front34": {
+   "file": "frames/front34.webp",
+   "facing": 0,
+   "h": 0.993,
+   "w": 0.3872,
+   "cx": 0.5098,
+   "head": [
+    0.4854,
+    0.128
+   ]
+  },
+  "back34": {
+   "file": "frames/back34.webp",
+   "facing": 0,
+   "h": 0.9901,
+   "w": 0.3766,
+   "cx": 0.4565,
+   "head": [
+    0.5221,
+    0.1227
+   ]
+  },
+  "idle": {
+   "file": "frames/idle.webp",
+   "facing": 0,
+   "h": 1.0,
+   "w": 0.3711,
+   "cx": 0.4864,
+   "head": [
+    0.502,
+    0.1279
+   ]
+  },
+  "walk": {
+   "file": "frames/walk.webp",
+   "facing": 1,
+   "h": 0.9715,
+   "w": 0.4976,
+   "cx": 0.6631,
+   "head": [
+    0.7249,
+    0.1281
+   ]
+  },
+  "run": {
+   "file": "frames/run.webp",
+   "facing": 1,
+   "h": 0.9378,
+   "w": 0.5954,
+   "cx": 0.6317,
+   "head": [
+    0.823,
+    0.1312
+   ]
+  },
+  "sprint": {
+   "file": "frames/sprint.webp",
+   "facing": 1,
+   "h": 0.8938,
+   "w": 0.5862,
+   "cx": 0.0725,
+   "head": [
+    0.8475,
+    0.1288
+   ]
+  },
+  "jump_start": {
+   "file": "frames/jump_start.webp",
+   "facing": 1,
+   "h": 0.8135,
+   "w": 0.5739,
+   "cx": 0.2861,
+   "head": [
+    0.8716,
+    0.1394
+   ]
+  },
+  "jump_air": {
+   "file": "frames/jump_air.webp",
+   "facing": 0,
+   "h": 0.9249,
+   "w": 0.7193,
+   "cx": 0.3482,
+   "head": [
+    0.5562,
+    0.1371
+   ]
+  },
+  "jump_land": {
+   "file": "frames/jump_land.webp",
+   "facing": 0,
+   "h": 0.7228,
+   "w": 0.5704,
+   "cx": 0.4716,
+   "head": [
+    0.5581,
+    0.1455
+   ]
+  },
+  "sit": {
+   "file": "frames/sit.webp",
+   "facing": 0,
+   "h": 0.8705,
+   "w": 0.7232,
+   "cx": 0.4549,
+   "head": [
+    0.5167,
+    0.1411
+   ]
+  },
+  "lie_down": {
+   "file": "frames/lie_down.webp",
+   "facing": 1,
+   "h": 0.513,
+   "w": 0.676,
+   "cx": 0.628,
+   "head": [
+    0.8327,
+    0.1559
+   ]
+  },
+  "sleep": {
+   "file": "frames/sleep.webp",
+   "facing": -1,
+   "h": 0.5181,
+   "w": 0.7101,
+   "cx": 0.4604,
+   "head": [
+    0.3185,
+    0.2774
+   ]
+  },
+  "stretch": {
+   "file": "frames/stretch.webp",
+   "facing": 0,
+   "h": 1.0207,
+   "w": 0.463,
+   "cx": 0.6156,
+   "head": [
+    0.534,
+    0.1535
+   ]
+  },
+  "yawn": {
+   "file": "frames/yawn.webp",
+   "facing": 0,
+   "h": 0.9793,
+   "w": 0.3527,
+   "cx": 0.4869,
+   "head": [
+    0.4203,
+    0.1361
+   ]
+  },
+  "wave": {
+   "file": "frames/wave.webp",
+   "facing": 0,
+   "h": 0.987,
+   "w": 0.4527,
+   "cx": 0.4872,
+   "head": [
+    0.4769,
+    0.1493
+   ]
+  },
+  "point": {
+   "file": "frames/point.webp",
+   "facing": 1,
+   "h": 1.0,
+   "w": 0.4974,
+   "cx": 0.4094,
+   "head": [
+    0.6984,
+    0.32
+   ]
+  },
+  "think": {
+   "file": "frames/think.webp",
+   "facing": 0,
+   "h": 0.5699,
+   "w": 0.7197,
+   "cx": 0.4991,
+   "head": [
+    0.5868,
+    0.1338
+   ],
+   "cut": true
+  },
+  "read": {
+   "file": "frames/read.webp",
+   "facing": 0,
+   "h": 0.7668,
+   "w": 0.6535,
+   "cx": 0.5057,
+   "head": [
+    0.5139,
+    0.1337
+   ],
+   "cut": true
+  },
+  "happy": {
+   "file": "frames/happy.webp",
+   "facing": 0,
+   "h": 0.9842,
+   "w": 0.6105,
+   "cx": 0.7155,
+   "head": [
+    0.4982,
+    0.1494
+   ]
+  },
+  "curious": {
+   "file": "frames/curious.webp",
+   "facing": 1,
+   "h": 0.9578,
+   "w": 0.4736,
+   "cx": 0.4844,
+   "head": [
+    0.85,
+    0.131
+   ]
+  },
+  "playful": {
+   "file": "frames/playful.webp",
+   "facing": 1,
+   "h": 0.7995,
+   "w": 0.6391,
+   "cx": 0.4494,
+   "head": [
+    0.8765,
+    0.1463
+   ]
+  },
+  "confident": {
+   "file": "frames/confident.webp",
+   "facing": 0,
+   "h": 1.0,
+   "w": 0.4079,
+   "cx": 0.5618,
+   "head": [
+    0.5585,
+    0.1305
+   ]
+  },
+  "scared": {
+   "file": "frames/scared.webp",
+   "facing": 0,
+   "h": 0.7361,
+   "w": 0.5994,
+   "cx": 0.6902,
+   "head": [
+    0.4243,
+    0.1307
+   ]
+  },
+  "angry": {
+   "file": "frames/angry.webp",
+   "facing": 0,
+   "h": 1.0158,
+   "w": 0.6395,
+   "cx": 0.4873,
+   "head": [
+    0.5421,
+    0.133
+   ]
+  },
+  "sad": {
+   "file": "frames/sad.webp",
+   "facing": 0,
+   "h": 0.9314,
+   "w": 0.5525,
+   "cx": 0.4909,
+   "head": [
+    0.6835,
+    0.1398
+   ]
+  },
+  "excited": {
+   "file": "frames/excited.webp",
+   "facing": 0,
+   "h": 0.9868,
+   "w": 0.5684,
+   "cx": 0.5472,
+   "head": [
+    0.551,
+    0.128
+   ]
+  },
+  "relaxed": {
+   "file": "frames/relaxed.webp",
+   "facing": 0,
+   "h": 0.8206,
+   "w": 0.7575,
+   "cx": 0.4667,
+   "head": [
+    0.4368,
+    0.1456
+   ]
+  },
+  "sleepy": {
+   "file": "frames/sleepy.webp",
+   "facing": 0,
+   "h": 0.562,
+   "w": 0.7668,
+   "cx": 0.4874,
+   "head": [
+    0.7096,
+    0.134
+   ],
+   "cut": true
+  },
+  "grumpy": {
+   "file": "frames/grumpy.webp",
+   "facing": 0,
+   "h": 0.971,
+   "w": 0.5,
+   "cx": 0.5173,
+   "head": [
+    0.5933,
+    0.1281
+   ]
+  },
+  "love": {
+   "file": "frames/love.webp",
+   "facing": 0,
+   "h": 0.9736,
+   "w": 0.5394,
+   "cx": 0.495,
+   "head": [
+    0.5722,
+    0.1254
+   ]
+  },
+  "attentive": {
+   "file": "frames/attentive.webp",
+   "facing": 0,
+   "h": 0.7203,
+   "w": 0.8412,
+   "cx": 0.4617,
+   "head": [
+    0.5373,
+    0.1419
+   ],
+   "cut": true
+  },
+  "study": {
+   "file": "frames/study.webp",
+   "facing": 0,
+   "h": 0.7599,
+   "w": 0.802,
+   "cx": 0.4217,
+   "head": [
+    0.5762,
+    0.1304
+   ],
+   "cut": true
+  }
+ },
+ "cycles": {
+  "walk": [
+   "walk",
+   "right"
+  ],
+  "run": [
+   "run",
+   "sprint"
+  ]
+ }
+}

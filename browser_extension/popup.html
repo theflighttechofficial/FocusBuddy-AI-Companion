@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>FocusBuddy</title>
+  <style>
+    body { font: 13px/1.45 "Segoe UI", system-ui, sans-serif; width: 280px; margin: 0; color: #1D2433; background: #F4F6FB; }
+    header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: #fff; border-bottom: 1px solid #E4E8F1; }
+    header img { width: 32px; height: 32px; }
+    h1 { font-size: 15px; margin: 0; }
+    main { padding: 14px 16px; }
+    .status { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid #E4E8F1; font-weight: 600; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #9AA3B5; }
+    .on .dot { background: #22B07D; }
+    .off .dot { background: #E5484D; }
+    label { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+    input[type=number] { width: 80px; padding: 4px 6px; border: 1px solid #E4E8F1; border-radius: 6px; }
+    p.note { color: #6B7489; font-size: 12px; margin: 12px 0 0; }
+    button { margin-top: 12px; width: 100%; padding: 8px; border: 0; border-radius: 8px; background: #5B6CFF; color: #fff; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header><img src="icons/icon48.png" alt=""><h1>FocusBuddy Connector</h1></header>
+  <main>
+    <div id="status" class="status"><span class="dot"></span><span id="statusText">Checking…</span></div>
+    <label>App port <input id="port" type="number" min="1024" max="65535"></label>
+    <label>Report private/incognito tabs <input id="private" type="checkbox"></label>
+    <button id="save">Save</button>
+    <p class="note">Only the active tab's address is shared, and only with the FocusBuddy app on this computer (127.0.0.1). Nothing is sent to the internet.</p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

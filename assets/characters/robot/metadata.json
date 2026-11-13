@@ -1,0 +1,58 @@
+{
+  "id": "robot",
+  "kind": "biped",
+  "species": "robot",
+  "production": true,
+  "source": "triposr",
+  "production_note": "3D model reconstructed from the Robot character sheet with TripoSR (image-to-3D), auto-rigged and skinned by tools/build_3d_companions.py; moves with real motion capture (CMU database, retargeted) plus the procedural rig (no baked clips).",
+  "license": "Model reconstructed with TripoSR (MIT) from the project's own character art. See LICENSE.md.",
+  "bone_map": {
+    "Root": "Root",
+    "Pelvis": "Pelvis",
+    "Spine": "Spine",
+    "Chest": "Chest",
+    "Neck": "Neck",
+    "Head": "Head",
+    "LeftUpperArm": "LeftUpperArm",
+    "LeftLowerArm": "LeftLowerArm",
+    "LeftHand": "LeftHand",
+    "RightUpperArm": "RightUpperArm",
+    "RightLowerArm": "RightLowerArm",
+    "RightHand": "RightHand",
+    "LeftUpperLeg": "LeftUpperLeg",
+    "LeftLowerLeg": "LeftLowerLeg",
+    "LeftFoot": "LeftFoot",
+    "RightUpperLeg": "RightUpperLeg",
+    "RightLowerLeg": "RightLowerLeg",
+    "RightFoot": "RightFoot"
+  },
+  "face": {
+    "mode": "none"
+  },
+  "morph_map": {
+    "breath": {
+      "param": "breath",
+      "scale": 1.0
+    }
+  },
+  "normals": "asset",
+  "pelvis_lift": "auto",
+  "transitions": {
+    "default": 0.25,
+    "idle->loco": 0.25,
+    "loco->idle": 0.3
+  },
+  "arm_out": 0.12,
+  "arm_fwd": 0.1,
+  "hand_zone": {
+    "min_abs_z": 15.2,
+    "y": [
+      -32.0,
+      -14.0
+    ]
+  },
+  "wave_up": true,
+  "mocap": {
+    "arm_out": 16
+  }
+}

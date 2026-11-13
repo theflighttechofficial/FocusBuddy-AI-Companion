@@ -1,0 +1,30 @@
+{
+  "id": "pipeline_test",
+  "kind": "biped",
+  "species": "human",
+  "personality": "buddy",
+  "display_name": "Pipeline test asset",
+  "production": false,
+  "selectable": false,
+  "description": "Generated test asset (tools/build_reference_asset.py) that exercises every pipeline feature: all five PBR texture slots, tangents, skin weights, clips with root motion and a morph weights channel, ARKit-named morph targets. Not production art.",
+  "face": {
+    "mode": "morph"
+  },
+  "clips": {
+    "idle": "Idle",
+    "walk": "Walk",
+    "wave": "Wave"
+  },
+  "clip_settings": {
+    "Walk": {
+      "root_motion": "HYBRID"
+    },
+    "Wave": {
+      "mask": "upper"
+    }
+  },
+  "root_motion": "HYBRID",
+  "transitions": {
+    "default": 0.2
+  }
+}

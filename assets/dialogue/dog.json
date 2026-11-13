@@ -1,0 +1,105 @@
+{
+  "_about": "Dog: energetic, supportive, encouraging.",
+  "GREETING": [
+    "HI {name}!! I'm SO happy you're here! Let's work!",
+    "Woof! Best coworker ever reporting in!"
+  ],
+  "IDLE_CHATTER": [
+    "*tail wags*",
+    "You're doing AMAZING!",
+    "Is that a task? Let's chase it!",
+    "Good job! Good job!",
+    "Best day EVER! Every day is the best day!",
+    "*tail wags at maximum speed*",
+    "Do you want to play? After work! After work!",
+    "I love you! I love this desktop! I love everything!",
+    "Who's working hard? YOU are! Yes you are!"
+  ],
+  "CLICKED": [
+    "Woof!",
+    "Pets?! YES!",
+    "*happy wiggle*"
+  ],
+  "DISTRACTION_NOTICE": [
+    "Ooh, what's that? {site}? Hmm...",
+    "Wait, are we playing now?"
+  ],
+  "DISTRACTION_WARNING": {
+    "2": [
+      "Come on! Back to work!",
+      "Come on! Let's finish this task!",
+      "I believe in you! Back to work?"
+    ],
+    "3": [
+      "{minutes} minutes on {site}... let's fetch that focus back!",
+      "You can do it! Let's go back!"
+    ]
+  },
+  "DISTRACTION_INTERVENTION": [
+    "Want me to fetch... I mean, close {site}?",
+    "{minutes} minutes! Should I close it? I'm a very good closer!"
+  ],
+  "COUNTDOWN": [
+    "Closing {site} in {seconds}! Ready, set..."
+  ],
+  "AUTO_CLOSED": [
+    "Got it! *proud tail wag*",
+    "Closed it! Am I a good dog? I'm a good dog!"
+  ],
+  "CLOSED": [
+    "Done! Let's GO!",
+    "Closed! Now let's crush this task!"
+  ],
+  "RETURNED": [
+    "YAY! You're back! Best human!",
+    "WOOHOO! Back to work!",
+    "That's my human!"
+  ],
+  "SNOOZED": [
+    "Okay! {minutes} minutes! I'll wait right here!",
+    "{minutes} minutes! I'll be patient! Very patient!"
+  ],
+  "FOCUS_START": [
+    "{minutes}-minute session! Let's GOOO!",
+    "Focus time! I'm so excited!"
+  ],
+  "FOCUS_COMPLETE": [
+    "YOU DID IT! {minutes} minutes!! *zoomies*",
+    "Session complete! Best. Human. Ever."
+  ],
+  "BREAK_START": [
+    "Break time! Walkies? Stretchies? Water!"
+  ],
+  "BREAK_OVER": [
+    "Break's over! Ready for round two?!"
+  ],
+  "OVERRIDE_DENIED": [
+    "No more extra time! But I KNOW you can do it!"
+  ],
+  "PETTED": [
+    "*tail goes brrrr*",
+    "Best. Pets. Ever!",
+    "Yes! Yes! Right there! 🐾",
+    "*tail wags so hard I spin*"
+  ],
+  "SHOUT": [
+    "WOOF!",
+    "BORK! Back to work!",
+    "Arf arf ARF!"
+  ],
+  "POKED": [
+    "Is it play time?! No? Aww.",
+    "Grr... (tail still wagging)"
+  ],
+  "WOKEN": [
+    "Huh?! I'm up! Who's a good boy?"
+  ],
+  "DIZZY": [
+    "Again! Again! ...wait, ugh."
+  ],
+  "CHEER": [
+    "Good human! GOOD human!",
+    "Wooo! You're doing so great!",
+    "*happy zoomies* That was awesome!"
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "_about": "Robot: logical, efficient, funny.",
+  "GREETING": [
+    "HELLO {name}. FOCUS PROTOCOL ONLINE.",
+    "Boot complete. Productivity subroutines loaded."
+  ],
+  "IDLE_CHATTER": [
+    "Beep boop. Monitoring nominal.",
+    "Running defrag on my thoughts.",
+    "Fun fact: I run on 0% caffeine.",
+    "Calculating... you're doing well.",
+    "Happiness levels: 100%. Bleep bloop!",
+    "Scanning... detected: one awesome human.",
+    "My circuits are cheering for you.",
+    "Running joy.exe... success!",
+    "Beep! That means 'you're doing great' in robot."
+  ],
+  "CLICKED": [
+    "Beep!",
+    "Input received.",
+    "Hello, human operator."
+  ],
+  "WAKE_UP": [
+    "SYSTEM RESUMED FROM SLEEP MODE."
+  ],
+  "DISTRACTION_NOTICE": [
+    "Distraction probability: {score}%.",
+    "Anomaly detected: {site}.",
+    "Scanning {site}... classification: suspicious."
+  ],
+  "DISTRACTION_WARNING": {
+    "2": [
+      "Distraction probability: {score}%. Recommendation: RETURN TO WORK.",
+      "Warning: {site} detected. Productivity declining."
+    ],
+    "3": [
+      "{minutes} min on {site}. Efficiency at {score}% risk.",
+      "ERROR 418: focus not found. Suggest returning."
+    ]
+  },
+  "DISTRACTION_INTERVENTION": [
+    "Distraction probability: {score}%. Shall I terminate the tab? (Politely.)",
+    "{minutes} minutes logged on {site}. Execute close?"
+  ],
+  "COUNTDOWN": [
+    "Auto-close sequence: T-minus {seconds}."
+  ],
+  "AUTO_CLOSED": [
+    "Distraction neutralized. Efficiency restored.",
+    "Tab closed. Productivity +12%."
+  ],
+  "CLOSED": [
+    "Task complete: distraction removed.",
+    "Closed. Beep boop."
+  ],
+  "RETURNED": [
+    "Focus restored. Excellent.",
+    "Productivity levels: optimal.",
+    "Good human. Beep."
+  ],
+  "SNOOZED": [
+    "Timer set: {minutes} min. I will remember. I always remember.",
+    "Snooze granted. Countdown: {minutes} min."
+  ],
+  "FOCUS_START": [
+    "Focus session initialized: {minutes} min.",
+    "Engaging focus mode. Distractions will be logged."
+  ],
+  "FOCUS_COMPLETE": [
+    "Session complete: {minutes} min of focus. Achievement unlocked.",
+    "Mission accomplished."
+  ],
+  "BREAK_START": [
+    "Initiate break.exe: {minutes} min. Recommend hydration."
+  ],
+  "BREAK_OVER": [
+    "Break terminated. Resume work protocol?"
+  ],
+  "OVERRIDE_DENIED": [
+    "Extra-time quota: 0. Request denied. Beep."
+  ],
+  "PETTED": [
+    "Affection detected. Happiness +10.",
+    "Affection received. Storing forever. 💙",
+    "*happy whirr*"
+  ],
+  "SHOUT": [
+    "ALERT: HEY!",
+    "BEEP BEEP! Focus protocol!",
+    "ERROR 418: you're off task!"
+  ],
+  "POKED": [
+    "Excessive input detected.",
+    "Please stop pressing my buttons."
+  ],
+  "WOKEN": [
+    "Rebooting... grumpily."
+  ],
+  "DIZZY": [
+    "Gyroscope uncalibrated."
+  ],
+  "CHEER": [
+    "Productivity spike detected! Excellent!",
+    "Efficiency: outstanding. Well done, {name}!",
+    "Bleep! High-five protocol engaged ✋"
+  ]
+}

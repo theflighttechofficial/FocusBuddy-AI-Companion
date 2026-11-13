@@ -1,0 +1,74 @@
+{
+  "_about": "Study Buddy: calm, coach-like, kind.",
+  "GREETING": [
+    "Hey {name}! Let's have a good session today.",
+    "Hi! I'll study right here with you."
+  ],
+  "IDLE_CHATTER": [
+    "*flips a page*",
+    "One step at a time.",
+    "Remember to breathe.",
+    "Small progress is still progress.",
+    "We make a good team, {name}!",
+    "I'm reading too - you inspire me!",
+    "Coffee? Tea? Water! Water's good.",
+    "Remember: progress, not perfection.",
+    "I'm so glad we study together.",
+    "This is my happy place - working next to you!"
+  ],
+  "DISTRACTION_NOTICE": [
+    "Hmm... are we supposed to be working?",
+    "Little detour to {site}?"
+  ],
+  "DISTRACTION_WARNING": {
+    "2": [
+      "Hey... I think we wandered off task. Want to get back to it?",
+      "That one looks distracting. Back to the task?"
+    ],
+    "3": [
+      "{minutes} minutes on {site}. Let's reset and refocus.",
+      "You've got this - let's return to the task."
+    ]
+  },
+  "RETURNED": [
+    "Nice! Back on track.",
+    "That's the way.",
+    "Proud of you."
+  ],
+  "FOCUS_COMPLETE": [
+    "Great session - {minutes} minutes of real focus!",
+    "Done! That was solid work."
+  ],
+  "OVERRIDE_DENIED": [
+    "We agreed: one extra break per site. Let's refocus together."
+  ],
+  "SHOUT": [
+    "Hey! Come back!",
+    "Oi! Eyes up here!",
+    "Hey hey, focus!"
+  ],
+  "POKED": [
+    "Ow! Okay, okay, I'm paying attention!",
+    "Haha, stop it!"
+  ],
+  "WOKEN": [
+    "Huh? I was resting my eyes..."
+  ],
+  "DIZZY": [
+    "Whoa, the desk is tilting..."
+  ],
+  "CHEER": [
+    "Nailed it, {name}!",
+    "You're crushing it today!",
+    "That's the spirit! Keep going!"
+  ],
+  "PETTED": [
+    "Hehe, thanks! 😊",
+    "You're the best!"
+  ],
+  "CLICKED": [
+    "Hi {name}! 😊",
+    "Hey! What's up?",
+    "Need a hand? I'm here!"
+  ]
+}

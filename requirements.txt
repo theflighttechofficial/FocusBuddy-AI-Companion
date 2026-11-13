@@ -1,0 +1,4 @@
+# Runtime: Qt for Python (UI, overlay, tray, OpenGL for the 3D renderer) + NumPy. Everything else is the Python standard library.
+PySide6-Essentials>=6.6
+# 3D character renderer (CPU rasteriser + GPU vertex packing). Without it FocusBuddy falls back to 2D art.
+numpy>=1.26

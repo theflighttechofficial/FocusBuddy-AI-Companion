@@ -1,0 +1,79 @@
+{
+  "id": "fox_sample",
+  "display_name": "Fox (glTF sample)",
+  "default_name": "Rusty",
+  "emoji": "\ud83e\udd8a",
+  "kind": "quadruped",
+  "species": "fox",
+  "personality": "fox",
+  "tagline": "Artist-made reference asset: textured, rigged, Survey / Walk / Run clips.",
+  "traits": [
+    "Observant",
+    "Quiet",
+    "Smooth"
+  ],
+  "production": true,
+  "production_note": "Artist-created low-poly model (Khronos glTF sample 'Fox'): real texture, skeleton, skin weights and animation clips. Used to validate the production pipeline. No facial rig.",
+  "license": "Model CC0 (PixelMannen); rigging & animation CC-BY 4.0 (tomkranis); glTF conversion CC-BY 4.0 (@AsoboStudio, @scurest). See LICENSE.md.",
+  "palette": {
+    "main": "#C8743A",
+    "shade": "#9C5426",
+    "light": "#F2E6D8",
+    "outline": "#5A2C12",
+    "accent": "#E8A08A",
+    "extra": "#2E2420"
+  },
+  "bone_map": {
+    "b_Root_00": "Root",
+    "b_Hip_01": "Pelvis",
+    "b_Spine01_02": "Spine",
+    "b_Spine02_03": "Chest",
+    "b_Neck_04": "Neck",
+    "b_Head_05": "Head",
+    "b_LeftUpperArm_09": "LeftUpperArm",
+    "b_LeftForeArm_010": "LeftLowerArm",
+    "b_LeftHand_011": "LeftHand",
+    "b_RightUpperArm_06": "RightUpperArm",
+    "b_RightForeArm_07": "RightLowerArm",
+    "b_RightHand_08": "RightHand",
+    "b_LeftLeg01_015": "LeftUpperLeg",
+    "b_LeftLeg02_016": "LeftLowerLeg",
+    "b_LeftFoot01_017": "LeftFoot",
+    "b_RightLeg01_019": "RightUpperLeg",
+    "b_RightLeg02_020": "RightLowerLeg",
+    "b_RightFoot01_021": "RightFoot",
+    "b_Tail01_012": "Tail0",
+    "b_Tail02_013": "Tail1",
+    "b_Tail03_014": "Tail2"
+  },
+  "materials": {
+    "fox_material": "fur"
+  },
+  "face": {
+    "mode": "none"
+  },
+  "clips": {
+    "idle": "Survey",
+    "idle_01": "Survey",
+    "walk": "Walk",
+    "run": "Run"
+  },
+  "clip_settings": {
+    "Survey": {
+      "loop": true
+    },
+    "Walk": {
+      "phase_offset": 0.0
+    },
+    "Run": {
+      "phase_offset": 0.0
+    }
+  },
+  "transitions": {
+    "default": 0.25,
+    "idle->loco": 0.3,
+    "loco->idle": 0.35
+  },
+  "root_motion": "HYBRID",
+  "reference": true
+}

@@ -1,0 +1,88 @@
+{
+  "_about": "Rabbit: shy, sweet, easily startled.",
+  "GREETING": [
+    "H-hi {name}... I'll help you focus, if that's okay.",
+    "*nose wiggle* Hello!"
+  ],
+  "IDLE_CHATTER": [
+    "*nibbles a tiny carrot*",
+    "*nose wiggles*",
+    "It's cozy here.",
+    "*happy binky*",
+    "Hop hop! You're doing great!",
+    "My ears are up because I'm proud of you!",
+    "Carrots are good. You are better.",
+    "*twitches nose cheerfully*"
+  ],
+  "CLICKED": [
+    "Eep!",
+    "Oh! Hi...",
+    "*happy hop*",
+    "Eep! Oh, it's you! Hi!",
+    "*hops* Hello!"
+  ],
+  "DRAG": [
+    "Eeek! Gently please!"
+  ],
+  "DISTRACTION_NOTICE": [
+    "Um... is {site} for work?",
+    "Oh... {site}? Hmm..."
+  ],
+  "DISTRACTION_WARNING": {
+    "2": [
+      "Sorry to bother you... but this looks distracting.",
+      "Maybe... we could go back to work?"
+    ],
+    "3": [
+      "It's been {minutes} minutes on {site}... I'm a little worried.",
+      "Please come back to your task?"
+    ]
+  },
+  "DISTRACTION_INTERVENTION": [
+    "Would you like me to close {site}? Only if you want...",
+    "{minutes} minutes... may I close it?"
+  ],
+  "AUTO_CLOSED": [
+    "I-I closed it! Was that okay?",
+    "Done! *hides*"
+  ],
+  "RETURNED": [
+    "Yay! *happy binky*",
+    "You're back! I'm so happy.",
+    "Thank you!"
+  ],
+  "FOCUS_START": [
+    "{minutes} minutes... I'll be very quiet.",
+    "Focus time! I'll sit right here."
+  ],
+  "FOCUS_COMPLETE": [
+    "You did it! {minutes} minutes! *binky*"
+  ],
+  "OVERRIDE_DENIED": [
+    "S-sorry... no more extra time for {site}."
+  ],
+  "PETTED": [
+    "*happy nose wiggles*",
+    "*soft happy squeak*",
+    "Ehehe, so soft!"
+  ],
+  "SHOUT": [
+    "EEP! Hey!",
+    "Thump thump! Focus!"
+  ],
+  "POKED": [
+    "Eep! Eep! Stop it!",
+    "*angry thumping*"
+  ],
+  "WOKEN": [
+    "Eep! I'm up!"
+  ],
+  "DIZZY": [
+    "Too much hopping..."
+  ],
+  "CHEER": [
+    "Hop-tastic, {name}!",
+    "You're bouncing through this!",
+    "Yay! *binky* Yay!"
+  ]
+}

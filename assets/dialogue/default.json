@@ -1,0 +1,349 @@
+{
+  "_about": "Baseline dialogue. Personality files override any event. Placeholders: {site} {minutes} {name} {buddy} {score} {seconds}. An event may be a list, or an object keyed by severity 1-4.",
+  "GREETING": [
+    "Hi {name}! I'll keep an eye on things while you work.",
+    "Hey {name}! Ready when you are.",
+    "{buddy} reporting for focus duty!"
+  ],
+  "IDLE_CHATTER": [
+    "*stretches*",
+    "Nice and focused in here.",
+    "You're doing great.",
+    "Hmm hmm hmm...",
+    "Don't forget to drink some water!",
+    "La la la~ ♪",
+    "I like it here. Good vibes on this desktop!",
+    "You've got this, {name}!",
+    "Fun fact: tiny breaks make big brains. Just saying!",
+    "Is it just me, or is today a good day?",
+    "I'm cheering for you - quietly, so I don't distract you!",
+    "*happy wiggle*",
+    "Teamwork makes the dream work!",
+    "One step at a time. You're doing amazing.",
+    "I counted: you're awesome. That's the number.",
+    "Psst... remember to blink! Your eyes will thank you.",
+    "Hehe, I love watching you get things done.",
+    "Small progress is still progress!",
+    "Have I told you you're my favourite human today?",
+    "Sitting up straight? Me too! *wiggles*",
+    "If you need me, I'm right here on your desktop!",
+    "Today's mood: sunshine ☀",
+    "Look at you go!",
+    "I believe in you more than in snacks. And I LOVE snacks.",
+    "Deep breath in... and out. Nice."
+  ],
+  "CLICKED": [
+    "Hi there!",
+    "Hehe, that tickles.",
+    "Need something? Double-click me for the dashboard.",
+    "I'm right here!",
+    "Hehe! Hi {name}!",
+    "Boop! You found me!",
+    "Yes? I'm all ears!",
+    "That made my day!",
+    "Double-click me to open the dashboard!",
+    "Hi hi hi!"
+  ],
+  "WAKE_UP": [
+    "Oh! I'm awake, I'm awake.",
+    "*yawn* ...welcome back!"
+  ],
+  "DRAG": [
+    "Whoa, whoa!",
+    "Where are we going?"
+  ],
+  "FALL": [
+    "Oof!",
+    "Nailed the landing. Mostly."
+  ],
+  "DISTRACTION_NOTICE": [
+    "Hmm... are we supposed to be working?",
+    "Is {site} part of the plan?",
+    "Wait... {site}?"
+  ],
+  "DISTRACTION_WARNING": {
+    "2": [
+      "This looks distracting.",
+      "Hey... I think we wandered off task. Want to get back to it?",
+      "{site} has been open for a bit. Back to work?"
+    ],
+    "3": [
+      "You've been on {site} for {minutes} min. Let's head back?",
+      "Still on {site}... want to switch back?"
+    ]
+  },
+  "DISTRACTION_INTERVENTION": [
+    "You've been here for {minutes} min. Want me to close this?",
+    "Shall I close {site} for you?",
+    "{minutes} minutes on {site}. Should I close it?"
+  ],
+  "COUNTDOWN": [
+    "Closing {site} in {seconds}s...",
+    "Auto-blocking {site} in {seconds}s."
+  ],
+  "AUTO_CLOSED": [
+    "Closed {site}. Back to the good stuff!",
+    "Done! {site} is out of the way."
+  ],
+  "CLOSED": [
+    "Closed it! Let's get back to work.",
+    "Poof, gone. You've got this."
+  ],
+  "MINIMIZED": [
+    "Tucked {site} away for you.",
+    "Minimized it. Out of sight, out of mind!"
+  ],
+  "REDIRECTED": [
+    "Swapped that tab for a focus page.",
+    "Tab redirected. Let's go!"
+  ],
+  "CLOSE_FAILED": [
+    "Hmm, I couldn't close that one. Can you do it?",
+    "That window didn't listen to me..."
+  ],
+  "PROTECTED_APP": [
+    "That's an important system app, so I won't touch it.",
+    "I'm not allowed to close that one - it's protected."
+  ],
+  "NO_EXTENSION": [
+    "I can't close browser tabs without the FocusBuddy extension, so I minimized the window instead."
+  ],
+  "SNOOZED": [
+    "Okay! {minutes} more minutes. I'll check back.",
+    "Sure, take {minutes} minutes."
+  ],
+  "SNOOZE_OVER": [
+    "Time's up! Distraction detected again.",
+    "Those {minutes} minutes flew by... back to work?"
+  ],
+  "IGNORED": [
+    "Okay, I'll let this one slide.",
+    "Got it, ignoring this one."
+  ],
+  "KEEP_OPEN": [
+    "Alright, it stays open. I trust you!",
+    "Okay, keeping it open."
+  ],
+  "RETURNED": [
+    "Nice! Back on track.",
+    "Yay, welcome back!",
+    "That's the spirit!"
+  ],
+  "RETURN_TO_FOCUS": [
+    "Let's go! Back to work.",
+    "Great choice!"
+  ],
+  "FOCUS_START": [
+    "Focus mode on! {minutes} minutes, let's do this.",
+    "Starting a {minutes}-minute session. I'll guard the door."
+  ],
+  "FOCUS_PAUSED": [
+    "Paused. Take a breath.",
+    "Session paused."
+  ],
+  "FOCUS_RESUMED": [
+    "And we're back!",
+    "Resuming focus."
+  ],
+  "FOCUS_HALFWAY": [
+    "Halfway there!",
+    "Half done - keep it up!"
+  ],
+  "FOCUS_COMPLETE": [
+    "Focus session complete! You focused for {minutes} minutes.",
+    "Done! {minutes} minutes of focus. Amazing!"
+  ],
+  "FOCUS_CANCELLED": [
+    "Session ended. Every bit counts!",
+    "Okay, stopping here."
+  ],
+  "BREAK_START": [
+    "Break time! {minutes} minutes - stretch, hydrate, look away from the screen.",
+    "Take a {minutes}-minute break. You earned it!"
+  ],
+  "BREAK_OVER": [
+    "Your break is over. Ready for another round?",
+    "Break's over! Let's get back to it."
+  ],
+  "MONITORING_PAUSED": [
+    "Monitoring paused. I'll just hang out.",
+    "Okay, I'm off duty for now."
+  ],
+  "MONITORING_RESUMED": [
+    "Monitoring back on!",
+    "Back on watch!"
+  ],
+  "SWITCHING_A_LOT": [
+    "Lots of app switching... everything okay?",
+    "We're bouncing around a lot. Pick one task?"
+  ],
+  "HOVER": [
+    "Hi!",
+    "Hello!",
+    "Oh, hi there!",
+    "Hey! 👋",
+    "Hiya!",
+    "Need anything?"
+  ],
+  "OVERRIDE_DENIED": [
+    "No more extra time for {site} this session. Let's get back to it.",
+    "You already used your extra time on {site}. Back to work?"
+  ],
+  "PETTED": [
+    "Ahh, that's nice.",
+    "More pets, please!",
+    "Happy happy!",
+    "Best. Human. Ever.",
+    "Aww, thank you! 💖",
+    "I'm so happy right now!",
+    "Hehe, again again!"
+  ],
+  "SHOUT": [
+    "HEY!",
+    "Hey hey HEY!",
+    "Focus!!",
+    "Eyes on the work!"
+  ],
+  "POKED": [
+    "Okay, okay! I'm here!",
+    "Stop poking me! ...fine, one more.",
+    "Hmph! Rude. Cute, but rude."
+  ],
+  "WOKEN": [
+    "Hmph. I was sleeping.",
+    "Five more minutes...",
+    "Who woke me up?!"
+  ],
+  "DIZZY": [
+    "Whoa... the room is spinning.",
+    "Wheee... ugh.",
+    "Which way is up?"
+  ],
+  "FOCUS_BLOCKED": [
+    "Not now - {site} can wait until the session is over.",
+    "{site}? Nope. Focus time. I put it away for you.",
+    "Blocked {site} for this session. Back to it, {name}!",
+    "Nice try. {site} is on a break until your session ends."
+  ],
+  "CHEER": [
+    "You're on a roll, {name}!",
+    "Look at you being productive!",
+    "So focused. So cool.",
+    "Keep going - you're doing brilliantly!",
+    "That's what I call focus!",
+    "Proud of you, {name}!",
+    "Every minute counts, and you're making them count!",
+    "Go go go! You've totally got this.",
+    "I see you working hard. High five! ✋",
+    "Momentum! Love it."
+  ],
+  "COMPLIMENT": [
+    "You have great taste in companions, by the way.",
+    "You make this desktop a happy place.",
+    "Has anyone told you that you're doing great today? Well, I am!",
+    "You're kind of a legend, {name}.",
+    "Smart AND hard-working? Wow.",
+    "I'm lucky to be your buddy."
+  ],
+  "FUN": [
+    "Fun fact: honey never spoils. Neither does your potential!",
+    "Fun fact: octopuses have three hearts. I have one, and it's full of cheer for you!",
+    "Fun fact: even a short walk can lift your mood.",
+    "Fun fact: your brain uses about 20% of your energy. Feed it well!",
+    "Fun fact: sea otters hold hands while they sleep. Cute, right?",
+    "Fun fact: the word 'focus' comes from Latin for 'hearth' - the warm centre of the home."
+  ],
+  "STRETCH": [
+    "You've been at it for a while - quick stretch? Arms up! 🙆",
+    "Shoulder roll time! Forward... and back. Ahh.",
+    "Stand up for a second? Your back will send a thank-you card.",
+    "Look at something far away for 20 seconds - eye spa time!"
+  ],
+  "WATER": [
+    "Sip of water? Hydrated brains are happy brains 💧",
+    "Water break! Cheers! 🥤",
+    "Quick reminder from your favourite companion: drink some water!"
+  ],
+  "ENCOURAGE": [
+    "Halfway to amazing!",
+    "Focus mode looks good on you.",
+    "Steady and strong. Keep going!",
+    "I'm guarding your focus. You just do your thing!",
+    "Nothing gets past me while you work!"
+  ],
+  "GREET_MORNING": [
+    "Good morning, {name}! ☀ Let's make today great.",
+    "Morning! Ready to crush it today?",
+    "Rise and shine, {name}! I saved you a sunny spot."
+  ],
+  "GREET_AFTERNOON": [
+    "Good afternoon, {name}! How's it going?",
+    "Afternoon! You're doing great so far.",
+    "Hey {name}! Second half of the day - let's go!"
+  ],
+  "GREET_EVENING": [
+    "Good evening, {name}! Almost done for today?",
+    "Evening! Proud of what you did today.",
+    "Hey {name}, it's evening - remember to rest too!"
+  ],
+  "GREET_NIGHT": [
+    "Working late, {name}? I'll keep you company. 🌙",
+    "It's getting late - don't forget to sleep!",
+    "Night owl mode! Just promise me you'll rest soon."
+  ],
+  "WELCOME_BACK": [
+    "Welcome back, {name}! I missed you!",
+    "Yay, you're back! 🎉",
+    "There you are! Ready to go again?",
+    "Oh hi! I kept your spot warm."
+  ],
+  "FLOW": [
+    "You've been in the zone for a while - I'm not saying a word. 🤫",
+    "Look at you go! Pure flow. 🌊",
+    "That's some serious focus. I'm impressed!",
+    "Shh... genius at work. ✨"
+  ],
+  "RESTLESS": [
+    "Lots of window hopping... pick just one thing for the next 10 minutes?",
+    "Your tabs are doing parkour. Want to settle on one task?",
+    "Feeling scattered? Let's choose one thing and finish it.",
+    "Hmm, jumping around a lot. Need a tiny plan?"
+  ],
+  "MARATHON": [
+    "Over an hour and a half without a break! Stand up and stretch with me. 🙆",
+    "Your back called - it wants a stretch break.",
+    "Long stretch! Two minutes away from the screen will make the next hour better.",
+    "Time to unglue from the chair for a sec. Stretch? 🧘"
+  ],
+  "LATE_NIGHT": [
+    "*yawn* It's getting late... don't forget to sleep, {name}. 🌙",
+    "Night owl mode! Wrap up soon - tomorrow-you will thank you.",
+    "It's late! Finish this bit and call it a day? 😴",
+    "The stars are out. So should the laptop be, soon. 🌟"
+  ],
+  "QUICK_RETURN": [
+    "Back already! That's the spirit. 💪",
+    "Nice escape - straight back to work!",
+    "Ooh, quick comeback! Proud of you.",
+    "You noticed and came back. That's the skill!"
+  ],
+  "MILESTONE": [
+    "{hours} hour(s) of focus today! 🎉",
+    "Milestone! {hours} focused hour(s) - you're on fire 🔥",
+    "Woohoo, {hours} hour(s) of real focus today!"
+  ],
+  "SLUMP": [
+    "Rough patch? It happens. One small task, five minutes - I'll be right here.",
+    "Lots of detours lately. Want to reset with a short focus session?",
+    "Hey, no judgement. Let's get one little win."
+  ],
+  "STREAK_RISK": [
+    "Your {streak}-day streak is waiting for today's session! Just one? 🔥",
+    "Don't break the chain! One focus session keeps your {streak}-day streak alive."
+  ],
+  "TASK_DONE": [
+    "Done: “{task}”! ✅ Great work!",
+    "Ticked off “{task}” - that feels good, right? 🎉",
+    "“{task}” - finished! Onwards!"
+  ]
+}

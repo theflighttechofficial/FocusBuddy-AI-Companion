@@ -1,0 +1,100 @@
+{
+  "id": "cat",
+  "kind": "quadruped",
+  "species": "cat",
+  "production": true,
+  "source": "hunyuan3d",
+  "production_note": "Cat: 3D model generated with Hunyuan3D from the character art, rigged for FocusBuddy (skeleton, bone-heat weights, face rig) by tools/rig; animated by the procedural rig.",
+  "license": "Model generated with Hunyuan3D (Tencent Hunyuan 3D community licence) from the project's own character art; rig by tools/rig. See LICENSE.md.",
+  "bone_map": {
+    "Root": "Root",
+    "Pelvis": "Pelvis",
+    "Spine": "Spine",
+    "Chest": "Chest",
+    "Neck": "Neck",
+    "Head": "Head",
+    "LeftUpperArm": "LeftUpperArm",
+    "LeftLowerArm": "LeftLowerArm",
+    "LeftHand": "LeftHand",
+    "RightUpperArm": "RightUpperArm",
+    "RightLowerArm": "RightLowerArm",
+    "RightHand": "RightHand",
+    "LeftUpperLeg": "LeftUpperLeg",
+    "LeftLowerLeg": "LeftLowerLeg",
+    "LeftFoot": "LeftFoot",
+    "RightUpperLeg": "RightUpperLeg",
+    "RightLowerLeg": "RightLowerLeg",
+    "RightFoot": "RightFoot",
+    "LeftEar": "LeftEar",
+    "RightEar": "RightEar",
+    "Tail0": "Tail0",
+    "Tail1": "Tail1",
+    "Tail2": "Tail2",
+    "Tail3": "Tail3"
+  },
+  "normals": "asset",
+  "pelvis_lift": "auto",
+  "face": {
+    "mode": "painted",
+    "data": "face/painted.npz",
+    "eyes": [
+      [
+        -0.12501,
+        0.66963,
+        0.05653,
+        0.03764,
+        -23.7957
+      ],
+      [
+        0.05332,
+        0.66677,
+        0.04879,
+        0.03984,
+        -26.5537
+      ]
+    ]
+  },
+  "morph_map": {
+    "eyeBlink": {
+      "param": "lid",
+      "scale": 1.0
+    },
+    "eyeSquint": {
+      "param": "lid_low",
+      "scale": 1.0
+    },
+    "mouthSmile": {
+      "param": "happy",
+      "scale": 1.0
+    },
+    "mouthFrown": {
+      "param": "frown",
+      "scale": 1.0
+    },
+    "jawOpen": {
+      "param": "jaw",
+      "scale": 1.0
+    },
+    "browInnerUp": {
+      "param": "brow_up",
+      "scale": 1.0
+    },
+    "browDown": {
+      "param": "brow_down",
+      "scale": 1.0
+    },
+    "breath": {
+      "param": "breath",
+      "scale": 1.0
+    }
+  },
+  "transitions": {
+    "default": 0.25,
+    "idle->loco": 0.25,
+    "loco->idle": 0.3
+  },
+  "tail_gain": 0.6,
+  "tail_floor_frac": 0.1199,
+  "pelvis_lift_k": 1.0,
+  "sit_drop": 0.82
+}

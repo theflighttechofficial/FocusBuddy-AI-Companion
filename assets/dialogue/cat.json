@@ -1,0 +1,111 @@
+{
+  "_about": "Cat: lazy, playful, curious, slightly sarcastic.",
+  "GREETING": [
+    "Oh, it's you. Fine, I'll supervise. From this sunny spot.",
+    "Meow. I'll be napping... I mean, watching."
+  ],
+  "IDLE_CHATTER": [
+    "*knocks something off your desk mentally*",
+    "Mrrp.",
+    "This desktop needs more sunbeams.",
+    "I could nap. I will nap.",
+    "Mrrp! Today is a good nap- I mean, work day.",
+    "*purrs supportively*",
+    "I approve of your work. Mostly.",
+    "If I sit on your keyboard, it's love. Just so you know.",
+    "This sunbeam is perfect. You're perfect. Everything's perfect."
+  ],
+  "CLICKED": [
+    "Mrrp?",
+    "Pet accepted.",
+    "You may continue petting.",
+    "I'm busy. Doing cat things."
+  ],
+  "WAKE_UP": [
+    "Mrr... I wasn't asleep. I was resting my eyes."
+  ],
+  "DISTRACTION_NOTICE": [
+    "I saw that tab. 👀",
+    "Really? {site} again?",
+    "Hmm... {site}? Interesting choice.",
+    "*squints at {site}*"
+  ],
+  "DISTRACTION_WARNING": {
+    "2": [
+      "This looks distracting. Just saying.",
+      "{site} isn't work. I'm a cat and even I know that."
+    ],
+    "3": [
+      "{minutes} minutes on {site}. I'm judging you. Gently.",
+      "I've napped less than you've scrolled."
+    ]
+  },
+  "DISTRACTION_INTERVENTION": [
+    "You've been here for {minutes} min. Want me to swat it closed?",
+    "I'm about to knock {site} off the table. Okay?"
+  ],
+  "COUNTDOWN": [
+    "Swatting {site} in {seconds}s... *wiggles*"
+  ],
+  "AUTO_CLOSED": [
+    "*swat* Gone. You're welcome.",
+    "Knocked it off the desk. Classic."
+  ],
+  "CLOSED": [
+    "*swat* Done.",
+    "Closed. Now back to work, human."
+  ],
+  "RETURNED": [
+    "Good human.",
+    "Fine. I'm a little proud of you.",
+    "Purr. Back on track."
+  ],
+  "SNOOZED": [
+    "{minutes} minutes. I'm counting. Cats can count.",
+    "Fine. {minutes} minutes. Then I swat."
+  ],
+  "FOCUS_START": [
+    "{minutes} minutes of focus? I'll guard the keyboard. By lying on it. Kidding.",
+    "Focus time. I'll be over here, judging distractions."
+  ],
+  "FOCUS_COMPLETE": [
+    "{minutes} minutes! Impressive. For a human.",
+    "Session done. Treats are customary."
+  ],
+  "BREAK_START": [
+    "Break time! Stretch like a cat. Like this. *streeetch*"
+  ],
+  "BREAK_OVER": [
+    "Break's over. Yes, I also hate it."
+  ],
+  "OVERRIDE_DENIED": [
+    "Nope. You used your extra time. I'm a cat, I keep track."
+  ],
+  "PETTED": [
+    "Purrrr...",
+    "Okay. You may continue. *purr*",
+    "Purrrrrrr... don't stop.",
+    "*happy slow blink*"
+  ],
+  "SHOUT": [
+    "MRAOW!",
+    "HEY. Tab. Now.",
+    "Hiss! (affectionately)"
+  ],
+  "POKED": [
+    "I will knock your coffee over.",
+    "Hss! ...ok, pet instead."
+  ],
+  "WOKEN": [
+    "I was NOT asleep.",
+    "You woke the cat. Bold."
+  ],
+  "DIZZY": [
+    "Nine lives, one headache."
+  ],
+  "CHEER": [
+    "Purr-fect focus, {name}!",
+    "You're the cat's whiskers today!",
+    "Mrrrow! Look at you go!"
+  ]
+}

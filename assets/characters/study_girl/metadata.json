@@ -1,0 +1,96 @@
+{
+  "id": "study_girl",
+  "kind": "biped",
+  "species": "human",
+  "production": true,
+  "source": "hunyuan3d",
+  "production_note": "Study Girl: 3D model generated with Hunyuan3D from the character art, rigged for FocusBuddy (skeleton, bone-heat weights, face rig) by tools/rig; moves with real motion capture (CMU database, retargeted) plus the procedural rig.",
+  "license": "Model generated with Hunyuan3D (Tencent Hunyuan 3D community licence) from the project's own character art; rig by tools/rig. See LICENSE.md.",
+  "bone_map": {
+    "Root": "Root",
+    "Pelvis": "Pelvis",
+    "Spine": "Spine",
+    "Chest": "Chest",
+    "Neck": "Neck",
+    "Head": "Head",
+    "LeftUpperArm": "LeftUpperArm",
+    "LeftLowerArm": "LeftLowerArm",
+    "LeftHand": "LeftHand",
+    "LeftUpperLeg": "LeftUpperLeg",
+    "LeftLowerLeg": "LeftLowerLeg",
+    "LeftFoot": "LeftFoot",
+    "RightUpperArm": "RightUpperArm",
+    "RightLowerArm": "RightLowerArm",
+    "RightHand": "RightHand",
+    "RightUpperLeg": "RightUpperLeg",
+    "RightLowerLeg": "RightLowerLeg",
+    "RightFoot": "RightFoot"
+  },
+  "normals": "asset",
+  "pelvis_lift": "auto",
+  "face": {
+    "mode": "painted",
+    "data": "face/painted.npz",
+    "eyes": [
+      [
+        -0.02524,
+        0.9143,
+        0.01225,
+        0.0066,
+        0.0
+      ],
+      [
+        0.0249,
+        0.91619,
+        0.01271,
+        0.00593,
+        2.06753
+      ]
+    ]
+  },
+  "morph_map": {
+    "eyeBlink": {
+      "param": "lid",
+      "scale": 0.0
+    },
+    "eyeSquint": {
+      "param": "lid_low",
+      "scale": 0.0
+    },
+    "mouthSmile": {
+      "param": "happy",
+      "scale": 1.0
+    },
+    "mouthFrown": {
+      "param": "frown",
+      "scale": 1.0
+    },
+    "jawOpen": {
+      "param": "jaw",
+      "scale": 1.0
+    },
+    "browInnerUp": {
+      "param": "brow_up",
+      "scale": 1.0
+    },
+    "browDown": {
+      "param": "brow_down",
+      "scale": 1.0
+    },
+    "breath": {
+      "param": "breath",
+      "scale": 1.0
+    }
+  },
+  "transitions": {
+    "default": 0.25,
+    "idle->loco": 0.25,
+    "loco->idle": 0.3
+  },
+  "pelvis_lift_k": 1.0,
+  "arm_limit": 175.0,
+  "wave_up": true,
+  "arm_out": 0.06,
+  "arm_fwd": 0.04,
+  "mocap": true
+}

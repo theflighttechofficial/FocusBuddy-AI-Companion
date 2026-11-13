@@ -1,0 +1,335 @@
+{
+ "about": "Motion-capture clips from the CMU Graphics Lab Motion Capture Database (mocap.cs.cmu.edu), BVH conversion by Bruce Hahne; see LICENSE.md.",
+ "bones": [
+  "Pelvis",
+  "Spine",
+  "Chest",
+  "Neck",
+  "Head",
+  "LeftUpperArm",
+  "LeftLowerArm",
+  "LeftHand",
+  "RightUpperArm",
+  "RightLowerArm",
+  "RightHand",
+  "LeftUpperLeg",
+  "LeftLowerLeg",
+  "LeftFoot",
+  "RightUpperLeg",
+  "RightLowerLeg",
+  "RightFoot"
+ ],
+ "fps": 30.0,
+ "clips": {
+  "angry": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "79_74",
+   "t": [
+    0.5,
+    7.0
+   ],
+   "frames": 196
+  },
+  "bow": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "113_02",
+   "t": [
+    0.0,
+    3.4
+   ],
+   "frames": 103
+  },
+  "celebrate": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "79_69",
+   "t": [
+    0.3,
+    6.6
+   ],
+   "frames": 190
+  },
+  "cry": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "79_72",
+   "t": [
+    0.5,
+    7.6
+   ],
+   "frames": 214
+  },
+  "dance": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "141_12",
+   "t": [
+    0.0,
+    3.4
+   ],
+   "frames": 103
+  },
+  "fidget": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "141_20",
+   "t": [
+    0.3,
+    3.2
+   ],
+   "frames": 88,
+   "events": {}
+  },
+  "idle": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "82_08",
+   "t": [
+    0.3,
+    6.2
+   ],
+   "frames": 165
+  },
+  "idle_01": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "113_21",
+   "t": [
+    0.2,
+    5.6
+   ],
+   "frames": 149
+  },
+  "idle_02": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "139_02",
+   "t": [
+    0.2,
+    7.6
+   ],
+   "frames": 222
+  },
+  "idle_03": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "137_28",
+   "t": [
+    0.5,
+    8.0
+   ],
+   "frames": 225,
+   "events": {}
+  },
+  "jog": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "35_17",
+   "t": [
+    0.3,
+    1.0
+   ],
+   "frames": 21
+  },
+  "jump": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "16_01",
+   "t": [
+    0.4,
+    2.0
+   ],
+   "frames": 49,
+   "events": {
+    "takeoff": 0.7333333333333333,
+    "land": 1.0333333333333334
+   }
+  },
+  "laugh": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "79_70",
+   "t": [
+    0.3,
+    6.2
+   ],
+   "frames": 178
+  },
+  "lie_down": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "113_08",
+   "t": [
+    0.9,
+    5.0
+   ],
+   "frames": 96
+  },
+  "run": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "09_01",
+   "t": [
+    0.2,
+    0.9
+   ],
+   "frames": 21
+  },
+  "scared": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "79_73",
+   "t": [
+    0.5,
+    6.0
+   ],
+   "frames": 166
+  },
+  "shrug": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "141_21",
+   "t": [
+    0.0,
+    2.3
+   ],
+   "frames": 70
+  },
+  "sit": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "114_16",
+   "t": [
+    9.6,
+    14.3
+   ],
+   "frames": 137
+  },
+  "sit_down": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "114_16",
+   "t": [
+    2.3,
+    8.2
+   ],
+   "frames": 89,
+   "events": {}
+  },
+  "sleep": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "113_08",
+   "t": [
+    5.2,
+    9.8
+   ],
+   "frames": 127
+  },
+  "stand_up": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "114_16",
+   "t": [
+    2.3,
+    8.2
+   ],
+   "frames": 75,
+   "events": {}
+  },
+  "stretch": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "143_30",
+   "t": [
+    0.0,
+    3.1
+   ],
+   "frames": 94
+  },
+  "wake": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "113_08",
+   "t": [
+    10.1,
+    14.3
+   ],
+   "frames": 91
+  },
+  "walk": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "16_15",
+   "t": [
+    0.9,
+    2.0
+   ],
+   "frames": 33
+  },
+  "walk_lady": {
+   "fps": 30.0,
+   "loop": true,
+   "src": "137_24",
+   "t": [
+    2.3,
+    3.5
+   ],
+   "frames": 28,
+   "events": {}
+  },
+  "wave": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "141_16",
+   "t": [
+    0.0,
+    2.4
+   ],
+   "frames": 73
+  },
+  "wave_big": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "143_25",
+   "t": [
+    0.4,
+    5.0
+   ],
+   "frames": 139
+  },
+  "wave_big_m": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "143_25",
+   "t": [
+    0.4,
+    5.0
+   ],
+   "frames": 139
+  },
+  "wave_m": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "141_16",
+   "t": [
+    0.0,
+    2.4
+   ],
+   "frames": 73
+  },
+  "yawn": {
+   "fps": 30.0,
+   "loop": false,
+   "src": "141_13",
+   "t": [
+    0.0,
+    3.1
+   ],
+   "frames": 94,
+   "events": {}
+  }
+ }
+}

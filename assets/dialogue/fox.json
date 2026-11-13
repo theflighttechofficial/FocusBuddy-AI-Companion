@@ -1,0 +1,88 @@
+{
+  "_about": "Fox: clever, witty, gentle.",
+  "GREETING": [
+    "Hello {name}. Let's outsmart some distractions today.",
+    "A clever plan: focus first, fun later."
+  ],
+  "IDLE_CHATTER": [
+    "*flicks tail thoughtfully*",
+    "Quiet minds build great things.",
+    "I spy... productivity.",
+    "Clever work deserves a clever buddy. That's me.",
+    "*flicks tail happily*",
+    "Quick, quiet and brilliant - like us.",
+    "I've plotted our success. It's going well.",
+    "Sly tip: start with the easiest task, then glide."
+  ],
+  "CLICKED": [
+    "Yes?",
+    "*tilts head*",
+    "Clever click."
+  ],
+  "DISTRACTION_NOTICE": [
+    "Hmm... {site}. A detour, perhaps?",
+    "I sense a rabbit hole nearby."
+  ],
+  "DISTRACTION_WARNING": {
+    "2": [
+      "We appear to have wandered off task.",
+      "That trail leads away from your goal.",
+      "Sneaky distraction spotted. Shall we slip back to work?"
+    ],
+    "3": [
+      "{minutes} minutes on {site}. The rabbit hole is deep.",
+      "Let's be cleverer than {site}."
+    ]
+  },
+  "DISTRACTION_INTERVENTION": [
+    "{minutes} minutes in. Want me to quietly close it?",
+    "I can make {site} disappear. Shall I?"
+  ],
+  "COUNTDOWN": [
+    "{site} vanishes in {seconds}s..."
+  ],
+  "AUTO_CLOSED": [
+    "And... it's gone. Smoothly done.",
+    "Vanished, like a fox in the night."
+  ],
+  "RETURNED": [
+    "Wise choice.",
+    "Back on the path. Nicely done.",
+    "Clever human."
+  ],
+  "FOCUS_START": [
+    "{minutes} minutes. Let's be brilliant.",
+    "Focus mode. I'll keep watch."
+  ],
+  "FOCUS_COMPLETE": [
+    "{minutes} minutes of sharp focus. Well played.",
+    "Session complete. Elegant work."
+  ],
+  "OVERRIDE_DENIED": [
+    "Clever try. No more extra time for {site}."
+  ],
+  "SHOUT": [
+    "Yip!",
+    "Hey. I saw that.",
+    "Ahem. HEY."
+  ],
+  "POKED": [
+    "Cleverly annoying. I'll allow it.",
+    "Hmph."
+  ],
+  "WOKEN": [
+    "I was plotting. Silently."
+  ],
+  "DIZZY": [
+    "Not so clever now..."
+  ],
+  "CHEER": [
+    "Foxy focus, {name}!",
+    "Sharp work! I'm impressed.",
+    "That's some clever thinking!"
+  ],
+  "PETTED": [
+    "Mm, alright, I'll allow it. 🦊",
+    "*happy fox chirp*"
+  ]
+}
