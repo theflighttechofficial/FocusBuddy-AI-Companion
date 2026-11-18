@@ -1,0 +1,36 @@
+MIT License
+
+Copyright (c) 2026 theflighttechofficial
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+Third-party assets
+
+The MIT License above covers the source code. Some files under assets/ come
+from third parties and keep their own terms:
+
+- assets/characters/*/  3D models generated with Tencent Hunyuan3D (or TripoSR
+  for the robot). Models made with Hunyuan3D fall under the Tencent Hunyuan 3D
+  Community License, which among other things does not cover use in the EU,
+  the UK or South Korea. Read each folder's LICENSE.md before any commercial
+  use or redistribution.
+- assets/mocap/  Clips from the CMU Graphics Lab Motion Capture Database. See
+  assets/mocap/LICENSE.md.

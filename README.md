@@ -4,31 +4,40 @@
 
 # FocusBuddy
 
-**A tiny 3D companion that lives on your Windows desktop and nudges you back to work when you drift.**
+**A 3D desktop pet that walks over and closes YouTube when you drift during a focus session.**
+
+<a href="https://github.com/theflighttechofficial/FocusBuddy-AI-Companion/releases/latest"><img src="https://img.shields.io/badge/Download_for_Windows-v2.3.0-8b5cf6?style=for-the-badge&logo=windows&logoColor=white" alt="Download for Windows"></a>
 
 [![Windows build & test](https://github.com/theflighttechofficial/FocusBuddy-AI-Companion/actions/workflows/windows.yml/badge.svg)](https://github.com/theflighttechofficial/FocusBuddy-AI-Companion/actions/workflows/windows.yml)
-![Version](https://img.shields.io/badge/version-2.3.0-8b5cf6)
-![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?logo=windows)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e)](LICENSE)
+![Platform](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows)
 ![Python](https://img.shields.io/badge/python-3.10%E2%80%933.13-3776AB?logo=python&logoColor=white)
-![Qt](https://img.shields.io/badge/UI-PySide6%20(Qt%206)-41CD52?logo=qt&logoColor=white)
-![Privacy](https://img.shields.io/badge/data-100%25%20local-ec4899)
+![Privacy](https://img.shields.io/badge/data-stays%20on%20your%20PC-ec4899)
 
-<img src="docs/lineup.png" alt="The eight FocusBuddy companions: cat, dog, fox, rabbit, robot, Study Buddy, Study Girl and Saree Girl" width="100%">
-
-[Features](#features) · [Screenshots](#screenshots) · [Install](#installation) · [Browser extension](#browser-extension) · [Privacy](#privacy--safety) · [Technical reference](docs/TECHNICAL.md)
+<img src="docs/demo.gif" width="560" alt="Demo: the cat notices a YouTube tab, walks over, offers Return to Focus, closes the tab and celebrates">
+<br><sub>Recorded from the built-in <code>--demo</code> mode: notice → walk over → ask → close the tab → celebrate.</sub>
 
 </div>
+
+## Quick start
+
+1. **Download** [`FocusBuddy-Setup-2.3.0.exe`](https://github.com/theflighttechofficial/FocusBuddy-AI-Companion/releases/latest) and run it. No administrator rights needed. If SmartScreen appears, click **More info → Run anyway** (the installer is not code-signed).
+2. **Pick a companion** in the setup wizard. It also walks you through loading the browser extension.
+3. **Start a 25-minute focus session** from the Home page, then open youtube.com. Within a minute or two your companion walks over and asks you to get back to work.
+
+No installer? Run from source in [three commands](#run-from-source), or try the safe demo with `python main.py --demo`.
 
 ---
 
-FocusBuddy is a desktop pet with a job. Your companion wanders your screen, naps on the taskbar and watches your cursor. When you slip onto YouTube during a focus session, it notices. It walks over to the window and asks if you want to get back to work. If you said it may, it presses the close button with its paw.
-
-It is **helpful, playful and slightly alive, never controlling**. It says *"Hey… I think we wandered off task. Want to get back to it?"*, not *"STOP WASTING TIME"*.
-
 <div align="center">
-<img src="docs/demo.gif" width="560" alt="Demo: the cat notices a YouTube tab, walks over, offers Return to Focus, closes the tab and celebrates">
-<br><sub>The built-in <code>--demo</code>: notice → walk over → ask → close the tab → celebrate. Simulated windows, nothing real is touched.</sub>
+<img src="docs/lineup.png" alt="The eight FocusBuddy companions: cat, dog, fox, rabbit, robot, Study Buddy, Study Girl and Saree Girl" width="100%">
+
+[Features](#features) · [Screenshots](#screenshots) · [How it works](#how-it-works) · [Install](#installation) · [Browser extension](#browser-extension) · [Privacy](#privacy--safety) · [Changelog](CHANGELOG.md) · [Technical reference](docs/TECHNICAL.md)
 </div>
+
+FocusBuddy is a desktop pet with a job. Your companion wanders your screen, naps on the taskbar and watches your cursor. When you slip onto a distracting site, it notices, walks over to that window and asks if you want to get back to work. If you allowed it, it presses the window's close button with its paw.
+
+It asks before it acts. It says *"Hey… I think we wandered off task. Want to get back to it?"*, not *"STOP WASTING TIME"*.
 
 ## Features
 
@@ -135,13 +144,15 @@ Level 4 runs only during a focus session you started, or when you turn on *Autom
 
 ## Installation
 
+### Installer (recommended)
+
+Download `FocusBuddy-Setup-2.3.0.exe` from the [latest release](https://github.com/theflighttechofficial/FocusBuddy-AI-Companion/releases/latest). It needs Windows 10 or 11 and nothing else: Python is bundled.
+
+### Run from source
+
 **Requirements:** Windows 10 or 11, and Python 3.10–3.13 from [python.org](https://www.python.org/downloads/) with *Add python.exe to PATH* ticked.
 
-### Quick start
-
-Double-click **`run.bat`**. The first run creates a virtual environment and installs the dependencies.
-
-Or from a terminal:
+Double-click **`run.bat`**. The first run creates a virtual environment and installs the dependencies. Or from a terminal:
 
 ```bat
 git clone https://github.com/theflighttechofficial/FocusBuddy-AI-Companion.git
@@ -154,7 +165,7 @@ python main.py
 
 The only runtime dependencies are **PySide6-Essentials** and **NumPy**.
 
-### Install as a Windows app
+### Build the installer yourself
 
 ```bat
 build_installer.bat
@@ -273,6 +284,10 @@ The [technical reference](docs/TECHNICAL.md) covers the character system, how to
 - [ ] Custom character creator
 - [ ] Calendar integration and shared focus rooms
 - [ ] Optional, opt-in sync
+
+## License
+
+The source code is under the [MIT License](LICENSE). The 3D character models and motion-capture clips in `assets/` keep their own third-party terms, listed below and in the LICENSE file.
 
 ## Credits
 
