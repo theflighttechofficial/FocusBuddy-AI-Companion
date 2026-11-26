@@ -965,7 +965,7 @@ class CompanionPlayground(QWidget):
         self.timer = QTimer(self)
         self.timer.setTimerType(Qt.PreciseTimer)
         self.timer.timeout.connect(self._tick)
-        self._last = time.monotonic()
+        self._last = time.perf_counter()
         if standalone:
             self.timer.start(16)
 
@@ -995,7 +995,7 @@ class CompanionPlayground(QWidget):
         pass
 
     def showEvent(self, ev):
-        self._last = time.monotonic()
+        self._last = time.perf_counter()
         self.timer.start(16)
         super().showEvent(ev)
 
@@ -1142,7 +1142,7 @@ class CompanionPlayground(QWidget):
         self.canvas.lines = self.sim.info(self.canvas.debug) + [f"x{self.speed:g}"]
 
     def _tick(self) -> None:
-        now = time.monotonic()
+        now = time.perf_counter()
         real = min(0.1, now - self._last)
         self._last = now
         self.step(real * self.speed)

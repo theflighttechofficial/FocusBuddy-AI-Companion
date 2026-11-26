@@ -90,7 +90,7 @@ LIFE_TRANSITIONS: dict[LifeState, set[LifeState]] = {
 class LifeMachine:
     """Explicit life state with a validated transition table and a short history (Playground)."""
 
-    def __init__(self, state: LifeState = L.SLEEPING, now: Callable[[], float] = _time.monotonic):
+    def __init__(self, state: LifeState = L.SLEEPING, now: Callable[[], float] = _time.perf_counter):
         self.state = state
         self._now = now
         self.since = now()

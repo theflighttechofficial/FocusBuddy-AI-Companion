@@ -73,7 +73,7 @@ class FocusCoach:
     def profile(self, days: int = 28, max_age: float = 120.0) -> Profile:
         """Hour-of-day averages over the last ``days`` (cached for ``max_age`` seconds)."""
         import time
-        if self._cache is not None and time.monotonic() - self._cache[0] < max_age and self._cache[1].days == days:
+        if self._cache is not None and time.perf_counter() - self._cache[0] < max_age and self._cache[1].days == days:
             return self._cache[1]
         now = self._now()
         since = (now.date() - dt.timedelta(days=days - 1))
@@ -120,7 +120,7 @@ class FocusCoach:
                 h = dt.datetime.fromtimestamp(e["timestamp"]).hour
                 distract[h] += float(e.get("duration") or 0) / n
         p = Profile(days, focus, distract, by_hour, tracked / 3600.0, wd_focus, top, len(days_seen))
-        self._cache = (time.monotonic(), p)
+        self._cache = (time.perf_counter(), p)
         return p
 
     # ------------------------------------------------------------ analysis

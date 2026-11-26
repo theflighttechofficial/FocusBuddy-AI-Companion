@@ -159,7 +159,7 @@ class AnimationStudio(QWidget):
         self.cycle_t = 0.0
         self.turn_dir = 1
         self.canvas.cam_x = 0.0
-        self._last = time.monotonic()
+        self._last = time.perf_counter()
         self._emotion_changed()
 
     def _emotion_changed(self, *_):
@@ -228,7 +228,7 @@ class AnimationStudio(QWidget):
                             f"Facing: {m.facing_blend:+.2f}   x{self.speed:g}"]
 
     def _tick(self):
-        now = time.monotonic()
+        now = time.perf_counter()
         real = now - self._last
         self._last = now
         self.step(real * self.speed if self.playing else 0.0)

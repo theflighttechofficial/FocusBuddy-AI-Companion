@@ -259,7 +259,7 @@ class IllustratedRenderer(BaseRenderer):
     def paint(self, g: QPainter, rect: QRectF, pose: Pose, facing: float = 1, state: str | None = None,
               debug: dict | None = None) -> None:
         t0 = time.perf_counter()
-        now = time.monotonic()
+        now = time.perf_counter()
         st = (state or "IDLE").upper()
         want = self.select(st, pose, now)
         in_cycle = st in CYCLES

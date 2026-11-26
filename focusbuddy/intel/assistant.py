@@ -64,7 +64,7 @@ class LocalLLM:
     def models(self) -> list:
         import time
         with self._lock:
-            if self._avail is not None and time.monotonic() - self._avail[0] < 60:
+            if self._avail is not None and time.perf_counter() - self._avail[0] < 60:
                 return self._avail[1]
         names: list = []
         if not is_local_url(self.url):
@@ -76,7 +76,7 @@ class LocalLLM:
         except (OSError, ValueError, urllib.error.URLError):
             names = []
         with self._lock:
-            self._avail = (time.monotonic(), names)
+            self._avail = (time.perf_counter(), names)
         return names
 
     def available(self) -> bool:

@@ -91,7 +91,7 @@ class SpriteRenderer(BaseRenderer):
         if "IDLE" not in self.anims:
             raise ValueError(f"sprite pack {folder} has no IDLE animation")
         self.state = "IDLE"
-        self._t0 = time.monotonic()
+        self._t0 = time.perf_counter()
         self._last_state = None
         self.head_pos = (10.0, -70.0)
         self.head_r = 22.0
@@ -108,9 +108,9 @@ class SpriteRenderer(BaseRenderer):
         state = state or self.state
         if state != self._last_state:
             self._last_state = state
-            self._t0 = time.monotonic()
+            self._t0 = time.perf_counter()
         anim = self.resolve(state)
-        pm = anim.frame(time.monotonic() - self._t0)
+        pm = anim.frame(time.perf_counter() - self._t0)
         g.save()
         g.setRenderHint(QPainter.SmoothPixmapTransform, True)
         if pm is not None:

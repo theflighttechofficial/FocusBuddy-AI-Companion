@@ -14,6 +14,7 @@ direction the character faces, -y is up.
 from __future__ import annotations
 
 import math
+import threading
 
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen
@@ -1470,12 +1471,25 @@ def set_default_mode(mode: str, quality: str = "normal") -> None:
 
 RENDER_MODES = {"illustrated": "Illustrated (character art)", "production": "3D models (GLB)", "3d": "3D Procedural", "2d": "2D Fallback"}
 _ASSET_CACHE: dict = {}
+_ASSET_LOCK = threading.Lock()
+_ASSET_LOADING: dict = {}          # id -> threading.Event while one thread loads it
 
 
 def load_asset(spec: CharacterSpec, rig=None):
-    """Cached CharacterAsset for a character (GLB if installed, else the procedural description)."""
+    """Cached CharacterAsset for a character (GLB if installed, else the procedural description).
+    Thread-safe: the dashboard previews load assets in the background (ui/preview_loader.py); a
+    second caller for the same character waits for the first instead of loading it again."""
     key = spec.id
-    if key not in _ASSET_CACHE:
+    while True:
+        with _ASSET_LOCK:
+            if key in _ASSET_CACHE:
+                return _ASSET_CACHE[key]
+            ev = _ASSET_LOADING.get(key)
+            if ev is None:
+                ev = _ASSET_LOADING[key] = threading.Event()
+                break
+        ev.wait()
+    try:
         from .character_asset import CharacterAsset
         height = None
         if rig is not None:
@@ -1484,8 +1498,14 @@ def load_asset(spec: CharacterSpec, rig=None):
                 height = asset_rig_height(rig)
             except Exception:  # noqa: BLE001
                 height = None
-        _ASSET_CACHE[key] = CharacterAsset.load(spec.id, rig_height=height)
-    return _ASSET_CACHE[key]
+        asset = CharacterAsset.load(spec.id, rig_height=height)
+        with _ASSET_LOCK:
+            _ASSET_CACHE[key] = asset
+        return asset
+    finally:
+        with _ASSET_LOCK:
+            _ASSET_LOADING.pop(key, None)
+        ev.set()
 
 
 def make_renderer(spec: CharacterSpec, mode: str = "2d", quality: str = "normal"):

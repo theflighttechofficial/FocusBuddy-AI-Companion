@@ -35,6 +35,9 @@ GL_BLEND = 0x0BE2
 GL_LESS = 0x0201
 GL_COLOR_BUFFER_BIT = 0x4000
 GL_DEPTH_BUFFER_BIT = 0x0100
+GL_TEXTURE_2D = 0x0DE1
+GL_RGBA = 0x1908
+GL_UNSIGNED_BYTE = 0x1401
 
 VERT = """
 #version 120
@@ -583,13 +586,46 @@ class GLSkinRaster(GLRaster):
         self.meshes[id(mesh)] = g
         return g
 
-    def _texture(self, key, img: np.ndarray, srgb_data: bool = True, version: int = 0):
+    def _sub_upload(self, t, img: np.ndarray, rects) -> bool:
+        """Re-send only ``rects`` (x, y, w, h) of ``img`` into texture ``t``, then rebuild its mip
+        chain on the GPU. False when the driver can't (the caller uploads the whole picture)."""
+        try:
+            f = self.ctx.functions()
+            h, w = img.shape[:2]
+            t.bind()
+            f.glPixelStorei(0x0CF5, 1)                          # GL_UNPACK_ALIGNMENT
+            for x, y, rw, rh in rects:
+                x0, y0 = max(0, int(x)), max(0, int(y))
+                x1, y1 = min(w, int(x + rw)), min(h, int(y + rh))
+                if x1 <= x0 or y1 <= y0:
+                    continue
+                block = np.ascontiguousarray(img[y0:y1, x0:x1, :4] if img.shape[2] >= 4 else
+                                             np.dstack([img[y0:y1, x0:x1, :3],
+                                                        np.full((y1 - y0, x1 - x0), 255, np.uint8)]),
+                                             dtype=np.uint8)
+                f.glTexSubImage2D(GL_TEXTURE_2D, 0, x0, y0, x1 - x0, y1 - y0, GL_RGBA, GL_UNSIGNED_BYTE, block)
+            f.glPixelStorei(0x0CF5, 4)
+            t.generateMipMaps()
+            return f.glGetError() == 0
+        except Exception:  # noqa: BLE001 - old driver / binding: fall back to a full upload
+            log.debug("partial texture upload failed", exc_info=True)
+            return False
+
+    def _texture(self, key, img: np.ndarray, srgb_data: bool = True, version: int = 0, dirty=None):
         t = self.textures.get(key)
         src = getattr(self, "_tex_src", None)
         if src is None:
             src = self._tex_src = {}
         if t is not None and self._tex_versions.get(key, 0) == version and src.get(key) is img:
             return t
+        if t is not None and src.get(key) is img and dirty is not None and len(img.shape) == 3:
+            # the same picture repainted in a few places (a blink, the mouth): send only those
+            if not dirty or self._sub_upload(t, img, list(dirty)):
+                dirty.clear()
+                self._tex_versions[key] = version
+                return t
+        if dirty is not None:
+            dirty.clear()                       # the full upload below covers every region
         if t is not None:                       # repainted on the CPU (sheet faces): upload again
             try:
                 t.destroy()
@@ -774,8 +810,10 @@ class GLSkinRaster(GLRaster):
                 has = []
                 for unit, (slot, _sampler) in enumerate(GL_TEXTURE_SLOTS):
                     if slot in tx:
+                        base = slot == "baseColor"
                         self._texture((id(tx[slot]), slot), tx[slot],
-                                      version=getattr(md, "tex_version", 0) if slot == "baseColor" else 0).bind(unit)
+                                      version=getattr(md, "tex_version", 0) if base else 0,
+                                      dirty=getattr(md, "tex_dirty", None) if base else None).bind(unit)
                         has.append(1.0)
                     else:
                         has.append(0.0)

@@ -740,6 +740,44 @@ class HistoryPage(Page):
 
 
 # =========================================================================== Window
+class _PageSlot(QWidget):
+    """A dashboard page that is built the first time it is needed (shown, refreshed, searched).
+
+    Building all seventeen pages up front made opening the dashboard take seconds; the slot holds
+    the page's place in the stack and forwards everything to the real page once it exists."""
+
+    def __init__(self, factory):
+        super().__init__()
+        self.setObjectName("Page")
+        self._factory = factory
+        self._page = None
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+
+    @property
+    def built(self) -> bool:
+        return self._page is not None
+
+    def ensure(self):
+        if self._page is None:
+            self._page = self._factory()
+            self._factory = None
+            self.layout().addWidget(self._page)
+        return self._page
+
+    def refresh(self):
+        return self.ensure().refresh()
+
+    def tick(self):
+        if self._page is not None and hasattr(self._page, "tick"):
+            return self._page.tick()
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(name)
+        return getattr(self.ensure(), name)
+
+
 class Dashboard(QMainWindow):
     NAV = [("home", "Home", "🏠"), ("focus", "Focus", "⏱"), ("tasks", "Tasks", "✅"), ("care", "Care", "💝"),
            ("coach", "Coach", "🧭"),
@@ -788,10 +826,13 @@ class Dashboard(QMainWindow):
         from .playground import CompanionPlayground
         from .intel_pages import ChatPage, CoachPage, ReportsPage, TasksPage
         from .care_page import CarePage
-        self.pages = [HomePage(app), FocusPage(app), TasksPage(app), CarePage(app), CoachPage(app), ChatPage(app), StatsPage(app),
-                      ReportsPage(app), HistoryPage(app), RulesPage(app),
-                      CompanionPage(app), CompanionPlayground(app.settings["character"]), SettingsPage(app),
-                      PrivacyPage(app), HelpPage(app), FaqPage(app), AboutPage(app)]
+        factories = [lambda: HomePage(app), lambda: FocusPage(app), lambda: TasksPage(app), lambda: CarePage(app),
+                     lambda: CoachPage(app), lambda: ChatPage(app), lambda: StatsPage(app), lambda: ReportsPage(app),
+                     lambda: HistoryPage(app), lambda: RulesPage(app), lambda: CompanionPage(app),
+                     lambda: CompanionPlayground(app.settings["character"]), lambda: SettingsPage(app),
+                     lambda: PrivacyPage(app), lambda: HelpPage(app), lambda: FaqPage(app), lambda: AboutPage(app)]
+        # pages are built when first needed; the rest follow a few at a time while the app is idle
+        self.pages = [_PageSlot(f) for f in factories]
         self.nav = NavRail()
         for i, (p, (key, text, emoji)) in enumerate(zip(self.pages, self.NAV)):
             self.stack.addWidget(p)
@@ -890,7 +931,9 @@ class Dashboard(QMainWindow):
         h.addLayout(main, 1)
         self.setCentralWidget(self.bg)
 
-        self._build_search()
+        self._index: dict[str, tuple[int, object]] = {}
+        self._search_ready = False
+        self.search.returnPressed.connect(lambda: self._go_search(self.search.text()))
         self.refresh_profile()
         # keyboard shortcuts (like any Windows app)
         for i in range(min(9, len(self.pages))):
@@ -975,6 +1018,7 @@ class Dashboard(QMainWindow):
 
     # ---------------------------------------------------------- command palette
     def open_palette(self, text: str = "") -> None:
+        self._ensure_search()
         self.palette.open(self.palette_commands(), text)
 
     def eventFilter(self, obj, ev):
@@ -1068,9 +1112,36 @@ class Dashboard(QMainWindow):
         return cmds
 
     # ---------------------------------------------------------- search
+    def _build_pending(self) -> None:
+        """Build the next not-yet-built page while the dashboard is open and idle (one per call,
+        spaced out so no single frame of an animation waits long); then the search index."""
+        if not self.isVisible():
+            return
+        nxt = next((p for p in self.pages if not p.built), None)
+        if nxt is not None:
+            if self.stack._anim.state() == self.stack._anim.State.Running or                     getattr(self.stack, "_card_rise", None) is not None:
+                QTimer.singleShot(250, self._build_pending)      # a page transition is playing
+                return
+            try:
+                nxt.ensure()
+            except Exception:  # noqa: BLE001 - a broken page must not stop the others
+                import logging
+                logging.getLogger("focusbuddy.ui").exception("page build failed")
+            QTimer.singleShot(120, self._build_pending)
+            return
+        if not self._search_ready:
+            self._build_search()
+
+    def _ensure_search(self) -> None:
+        if not self._search_ready:
+            for p in self.pages:
+                p.ensure()
+            self._build_search()
+
     def _build_search(self) -> None:
         from PySide6.QtWidgets import QCompleter
-        self._index: dict[str, tuple[int, object]] = {}
+        self._index = {}
+        self._search_ready = True
         for i, (p, (key, text, _)) in enumerate(zip(self.pages, self.NAV)):
             self._index[f"{text.replace('&&', '&')}  ·  page"] = (i, None)
             for card in p.findChildren(GlassCard):
@@ -1087,9 +1158,9 @@ class Dashboard(QMainWindow):
         comp.setMaxVisibleItems(10)
         comp.activated.connect(self._go_search)
         self.search.setCompleter(comp)
-        self.search.returnPressed.connect(lambda: self._go_search(self.search.text()))
 
     def _go_search(self, text: str) -> None:
+        self._ensure_search()
         hit = self._index.get(text)
         if hit is None:
             low = text.lower().strip()
@@ -1144,6 +1215,7 @@ class Dashboard(QMainWindow):
         if not getattr(self, "_cascaded", False):
             # the first time the window opens, its cards arrive one after another
             self._cascaded = True
+            QTimer.singleShot(1500, self._build_pending)
             from .motion import cascade_in, full_motion
             if full_motion():
                 QTimer.singleShot(0, lambda: self.stack.currentWidget() is not None and

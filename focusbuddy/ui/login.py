@@ -55,7 +55,7 @@ class BrandPanel(QWidget):
         super().__init__(parent)
         self.setMinimumWidth(360)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self._t0 = time.monotonic()
+        self._t0 = time.perf_counter()
         self._pix_size = 0
         self._pix: list = []
         self._bg = None
@@ -105,7 +105,7 @@ class BrandPanel(QWidget):
         g.setRenderHint(QPainter.Antialiasing)
         g.setRenderHint(QPainter.SmoothPixmapTransform)
         r = QRectF(self.rect())
-        t = time.monotonic() - self._t0
+        t = time.perf_counter() - self._t0
         card = r.adjusted(10, 10, -4, -10)
         path = QPainterPath()
         path.addRoundedRect(card, 26, 26)

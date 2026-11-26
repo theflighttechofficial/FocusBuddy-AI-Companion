@@ -17,12 +17,15 @@ the texture:
   the chin).
 
 Nothing changes while the values stay the same, so the texture is only rewritten (and re-uploaded
-on the GPU path) during a blink or an expression change.
+on the GPU path) during a blink or an expression change. Only the texture tiles that hold eye or
+mouth texels are re-uploaded (``dirty``), and the redrawn texels are cached per lid / jaw value:
+a blink used to re-send the whole 2048-4096 px texture every frame (a 20-30 ms hitch).
 """
 
 from __future__ import annotations
 
 import logging
+from collections import OrderedDict
 from pathlib import Path
 from typing import Optional
 
@@ -36,8 +39,31 @@ def _s(t):
     return t * t * (3.0 - 2.0 * t)
 
 
+def tile_spans(idx: np.ndarray, width: int, tile: int = 32) -> list[tuple[int, int, int, int]]:
+    """Rectangles (x, y, w, h) that cover every texel of ``idx`` (flat indices into a texture
+    ``width`` texels wide): the tiles that hold such a texel, merged along each tile row."""
+    idx = np.asarray(idx, dtype=np.int64)
+    if not len(idx):
+        return []
+    ty, tx = (idx // width) // tile, (idx % width) // tile
+    keys = np.unique(ty * 1_000_000 + tx)
+    out: list[list[int]] = []
+    run: Optional[list[int]] = None
+    for k in keys.tolist():
+        r, c = divmod(k, 1_000_000)
+        if run is not None and run[0] == r and run[2] == c - 1:
+            run[2] = c
+            continue
+        if run is not None:
+            out.append(run)
+        run = [r, c, c]
+    out.append(run)
+    return [(c0 * tile, r * tile, (c1 - c0 + 1) * tile, tile) for r, c0, c1 in out]
+
+
 class PaintedFace:
     STEP = 0.04      # values are quantised: a change smaller than this does not redraw
+    CACHE = 40       # redrawn eye / mouth texels kept per quantised value (a blink repeats the same values)
     R = 1.17         # the lid area: the fitted eye ellipse and its painted outline (data may override)
     LASH_R = 1.1     # the closed eye's lash line: the bottom of the eye (data may override)
 
@@ -76,6 +102,12 @@ class PaintedFace:
         self.tex: Optional[np.ndarray] = None
         self.e_orig = self.m_orig = None
         self.state = (0.0, 0.0, 0.0)
+        # texture regions rewritten since the GPU last uploaded them (the GPU path clears it)
+        self.dirty: set[tuple[int, int, int, int]] = set()
+        self.e_spans: list[tuple[int, int, int, int]] = []
+        self.m_spans: list[tuple[int, int, int, int]] = []
+        self._e_cache: OrderedDict = OrderedDict()
+        self._m_cache: OrderedDict = OrderedDict()
 
     def bind(self, tex: np.ndarray) -> None:
         if tuple(tex.shape[:2]) != self.size:
@@ -86,6 +118,23 @@ class PaintedFace:
         flat[self.e_idx, :3] = np.clip(self.e_orig + 0.5, 0, 255).astype(np.uint8)
         self.m_orig = flat[self.m_idx, :3].astype(np.float32)
         self.state = (0.0, 0.0, 0.0)
+        w = int(tex.shape[1])
+        self.e_spans = tile_spans(self.e_idx, w)
+        self.m_spans = tile_spans(self.m_idx, w)
+        self._e_cache.clear()
+        self._m_cache.clear()
+        self.dirty.clear()
+
+    def _cached(self, cache: OrderedDict, key, make) -> np.ndarray:
+        v = cache.get(key)
+        if v is not None:
+            cache.move_to_end(key)
+            return v
+        v = np.clip(make() + 0.5, 0, 255).astype(np.uint8)
+        cache[key] = v
+        if len(cache) > self.CACHE:
+            cache.popitem(last=False)
+        return v
 
     # the key light's reflection in the eye (eye-ellipse units, +Y up): upper left of the viewer,
     # the same spot in both eyes, so the two reflections agree like real ones do
@@ -251,9 +300,11 @@ class PaintedFace:
             return False
         flat = self.tex.reshape(-1, self.tex.shape[2])
         if q[0] != self.state[0] or q[1] != self.state[1]:
-            flat[self.e_idx, :3] = np.clip(self.eyes(q[0], q[1]) + 0.5, 0, 255).astype(np.uint8)
+            flat[self.e_idx, :3] = self._cached(self._e_cache, (q[0], q[1]), lambda: self.eyes(q[0], q[1]))
+            self.dirty.update(self.e_spans)
         if q[2] != self.state[2] and len(self.m_idx):
-            flat[self.m_idx, :3] = np.clip(self.mouth(q[2]) + 0.5, 0, 255).astype(np.uint8)
+            flat[self.m_idx, :3] = self._cached(self._m_cache, q[2], lambda: self.mouth(q[2]))
+            self.dirty.update(self.m_spans)
         self.state = q
         return True
 

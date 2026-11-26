@@ -141,7 +141,7 @@ class SoundManager:
     def play(self, name: str) -> None:
         if not self.enabled or self.muted or self._winsound is None:
             return
-        now = time.monotonic()
+        now = time.perf_counter()
         if now - self._last.get(name, 0) < 0.15:
             return
         self._last[name] = now

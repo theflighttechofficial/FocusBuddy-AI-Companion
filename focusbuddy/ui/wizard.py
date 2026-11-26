@@ -431,10 +431,10 @@ class SetupWizard(QDialog):
         # Chrome / Edge / Brave, the connection port busy) or after a few minutes of trying
         import time as _t
         if on_ext and not hasattr(self, "_ext_since"):
-            self._ext_since = _t.monotonic()
+            self._ext_since = _t.perf_counter()
             QTimer.singleShot(150_000, self._update_nav)
         stuck = not self.ext.has_browser or not self.ext.available or \
-            (hasattr(self, "_ext_since") and _t.monotonic() - self._ext_since > 145)
+            (hasattr(self, "_ext_since") and _t.perf_counter() - self._ext_since > 145)
         self.later.setVisible(on_ext and not self.ext.connected and stuck)
 
     def _skip_extension(self) -> None:

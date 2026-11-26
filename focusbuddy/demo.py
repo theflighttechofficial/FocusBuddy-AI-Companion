@@ -203,7 +203,7 @@ class DemoDirector:
             return
         for cmd in b._take_commands(DEMO_CLIENT):
             if cmd["type"] == "close_tab" and self.h_browser is not None:
-                self._x_pressed_until = time.monotonic() + 0.3   # show the X button "pressed"
+                self._x_pressed_until = time.perf_counter() + 0.3   # show the X button "pressed"
 
                 def close_tab(cid=cmd["id"]):
                     if self.h_browser is None:
@@ -224,7 +224,7 @@ class DemoDirector:
                 "title": "Funny cat compilation #47 - YouTube", "tabId": 11, "windowId": 1, "focused": True}})
 
     def event(self, text: str) -> None:
-        t = time.monotonic() - self.t0
+        t = time.perf_counter() - self.t0
         line = f"[{t:5.1f}s] {text}  (companion={self.app.companion.state.value})"
         self.log.append(line)
         log.info("DEMO %s", line)
@@ -232,7 +232,7 @@ class DemoDirector:
 
     # ------------------------------------------------------------ script
     def start(self) -> None:
-        self.t0 = time.monotonic()
+        self.t0 = time.perf_counter()
         self.editor.show()
         self.wm.focus(self.h_editor)
         self.app.start()
@@ -331,7 +331,7 @@ class DemoDirector:
                 g.drawText(QRectF(gg.x() + 10, gg.y() - cap, gg.width() - 70, cap), Qt.AlignVCenter, win.windowTitle())
                 # caption buttons: 46 px wide each, close button at the far right (Windows layout)
                 close = QRectF(gg.right() + 1 - 46, gg.y() - cap, 46, cap)
-                pressed = getattr(self, "_x_pressed_until", 0) > time.monotonic() and win is self.browser
+                pressed = getattr(self, "_x_pressed_until", 0) > time.perf_counter() and win is self.browser
                 if pressed:
                     g.fillRect(close, QColor("#C42B1C"))
                 g.setPen(QColor("#FFFFFF" if pressed else "#666"))

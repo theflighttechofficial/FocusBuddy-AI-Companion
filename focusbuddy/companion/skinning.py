@@ -248,6 +248,20 @@ class RigDriver:
         except (TypeError, ValueError):
             self.head_scale = 1.0
         self.head_scale = max(0.7, min(1.6, self.head_scale))
+        # the final pose never jumps between frames (inertia.py). Left out: the eyes (a saccade is
+        # instant) and everything that stands on the ground - the pelvis and the leg chains (all four
+        # for animals), whose feet the IK keeps planted; an offset there would make them slide
+        from .inertia import PoseInertializer, joint_scale, optional_exclude
+        excl = set(optional_exclude(self.canon, ("LeftEye", "RightEye", "Pelvis", "Root")))
+        for name, bones in LIMB_BONES[kind if kind in LIMB_BONES else "quadruped"].items():
+            if kind == "biped" and name.startswith("arm"):
+                continue                                  # a person's arms are free: filtered
+            for b in bones:
+                i = self.canon.get(b, -1)
+                if i >= 0:
+                    excl.update(self._subtree(i))
+        self.inertia = PoseInertializer(self.parent, sorted(excl), joint_scale(self.B))
+        self._last_clock: Optional[float] = None
 
     def _topo(self) -> list:
         out, seen = [], set()
@@ -316,6 +330,15 @@ class RigDriver:
             self.clip_info = ("", res.action if res is not None else "")
             if self.clip is not None:
                 D, T = self._apply_clip(D, T)
+        clock = getattr(pose, "clock", None)
+        if clock is not None:
+            clock = float(clock)
+            dt = 0.0 if self._last_clock is None else clock - self._last_clock
+            if dt < 0.0:                                 # the clock went back (a new scene): start over
+                self.inertia.reset()
+                dt = 0.0
+            self._last_clock = clock
+            D, T = self.inertia.apply(D, T, dt)
         self._eyes(D, T, pose)
         M = np.zeros((n, 4, 4))
         M[:, :3, :3] = D
@@ -452,7 +475,14 @@ class RigDriver:
                     if expr > 0.0:
                         goal = goal + (eg - goal) * min(1.0, expr)
                         wave_pole = np.array([0.0, 1.0, side * 1.0])
-                    if wave > 0.05 and name == ("arm_L" if tg["LeftHand"][1] <= tg["RightHand"][1] else "arm_R"):
+                    # which hand waves is decided when the wave starts and kept until it ends (re-deciding
+                    # every frame by the hands' heights swapped the arms mid-wave: a hand teleported)
+                    if wave > 0.05:
+                        if not getattr(self, "_wave_arm", ""):
+                            self._wave_arm = "arm_L" if tg["LeftHand"][1] <= tg["RightHand"][1] else "arm_R"
+                    else:
+                        self._wave_arm = ""
+                    if wave > 0.05 and name == self._wave_arm:
                         rel = np.array([0.08 * L, -0.8 * L, side * 0.6 * L])
                         rel = axis_angle((1.0, 0.0, 0.0), math.radians(0.6 * float(getattr(pose, "paw_wave", 0.0)))) @ rel
                         goal = goal + (root + rel - goal) * min(1.0, wave)
@@ -641,11 +671,22 @@ class RigDriver:
         if st is None:
             st = self._air_state = {"v0": 1.0}
         vy = float(getattr(pose, "jump_vy", 0.0))
+        clock = float(getattr(pose, "clock", 0.0))
+        dt = clock - st.get("t", clock)
+        st["t"] = clock
         if air <= 0.0:
             st["v0"] = 1.0
+            st["u"] = 0.0
             return 0.0, 0.0
         st["v0"] = max(st["v0"], abs(vy))
-        u = max(-1.0, min(1.0, vy / st["v0"]))
+        u_raw = max(-1.0, min(1.0, vy / st["v0"]))
+        # the flight position eases: the vertical speed snaps at take-off (0 -> full) and at touch-down
+        # (full -> 0), which pitched the whole body (and swung the tail / ears) in a single frame
+        if 0.0 < dt < 0.25:
+            st["u"] = st.get("u", u_raw) + (u_raw - st.get("u", u_raw)) * (1.0 - math.exp(-dt / 0.06))
+        elif dt != 0.0 or "u" not in st:
+            st["u"] = u_raw
+        u = st["u"]
         pel, sh = self.canon.get("Pelvis", -1), self.canon.get("LeftUpperArm", -1)
         if min(pel, sh) >= 0:
             piv = T[pel].copy()
@@ -929,8 +970,16 @@ class RigDriver:
             bk = np.array([bk[0], 0.0, bk[2]])
             bn = float(np.linalg.norm(bk))
             bk = bk / bn if bn > 1e-9 else np.array([-1.0, 0.0, 0.0])
-            if hn > 1e-9 and float(np.dot(hv / hn, bk)) > 0.0:
-                hv = hv / hn
+            # ... and the choice is a blend, not a switch: the direction turns from "behind" to "along
+            # the segment" gradually as the segment leans back (a hard switch swung the tail ~90 deg
+            # in one frame whenever the lean crossed the vertical)
+            if hn > 1e-9:
+                hd = hv / hn
+                w = max(0.0, min(1.0, float(np.dot(hd, bk)) / 0.5))
+                w = w * w * (3.0 - 2.0 * w)
+                mix = hd * w + bk * (1.0 - w)
+                mn = float(np.linalg.norm(mix))
+                hv = mix / mn if mn > 1e-9 else bk
             else:
                 hv = bk
             want = hv * math.sqrt(max(L * L - h * h, 0.0)) + np.array([0.0, h, 0.0])

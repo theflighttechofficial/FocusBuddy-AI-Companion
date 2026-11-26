@@ -86,6 +86,10 @@ class FocusBuddyApp(QObject):
             if self.settings["renderer"] in ("illustrated", "production"):
                 self.settings.set("renderer", "production")
             self.settings.set("renderer_version", 3)
+        if not self.settings["auto_quality"]:
+            # 2.4: "Adaptive 3D quality" became the Performance mode; switched off = keep my quality
+            self.settings.set("performance_mode", "quality")
+            self.settings.set("auto_quality", True)
         if int(self.settings.get("size_version", 1) or 1) < 2:
             # the presets grew (the new characters are long animals): keep custom sizes, move presets
             if SIZE_PRESETS.get(self.settings["size_preset"]) is not None:
@@ -230,7 +234,7 @@ class FocusBuddyApp(QObject):
             QTimer.singleShot(1100, self._start_companion)
         else:
             self._start_companion()
-        self._life_saved = time.monotonic()
+        self._life_saved = time.perf_counter()
         self.tray.show()
         self._refresh_tray()
         self.poll_timer.start(max(250, int(self.settings["poll_interval_ms"])))
@@ -728,7 +732,7 @@ class FocusBuddyApp(QObject):
         self._active_s = self._active_s + interval if idle < 180 else 0.0
         if idle > 240 or not self._can_chat(0.95):
             return
-        now = time.monotonic()
+        now = time.perf_counter()
         if self._active_s > 50 * 60 and now - self._last_reminder["STRETCH"] > 45 * 60:
             event = "STRETCH"
             self._last_reminder["STRETCH"] = now
@@ -894,8 +898,9 @@ class FocusBuddyApp(QObject):
         c.animator.face.amount = _LIFE.get(s["lifelike_level"], 1.0)
         from .companion.renderer import set_default_mode
         set_default_mode(s["renderer"], s["render_quality"])
-        c.set_render_mode(s["renderer"], s["render_quality"])
         c.auto_quality = bool(s["auto_quality"])
+        c.set_performance(s["performance_mode"])
+        c.set_render_mode(s["renderer"], s["render_quality"])
         c.set_shadows(bool(s["shadows"]))
         b.cursor_interaction = s["cursor_reactions"]
         b.stumbles = bool(s["stumbles"])
@@ -938,8 +943,8 @@ class FocusBuddyApp(QObject):
 
     def _refresh_world(self) -> None:
         """Give the companion its world: visible windows (logical coords) it can stand on / avoid."""
-        if time.monotonic() - getattr(self, "_life_saved", time.monotonic()) > 60.0:
-            self._life_saved = time.monotonic()
+        if time.perf_counter() - getattr(self, "_life_saved", time.perf_counter()) > 60.0:
+            self._life_saved = time.perf_counter()
             self.save_life()
         if self.settings["hide_in_fullscreen"] and self.wm.available:
             self.companion.life.set_fullscreen(self._fullscreen_app())
@@ -1041,12 +1046,12 @@ class FocusBuddyApp(QObject):
     def focus_today_seconds(self) -> float:
         """Focused seconds today (cached for a minute - the database read flushes the stats)."""
         t, v = self._focus_today_cache
-        if time.monotonic() - t > 60:
+        if time.perf_counter() - t > 60:
             try:
                 v = float(self.stats.today()["focus_seconds"])
             except Exception:  # noqa: BLE001
                 v = 0.0
-            self._focus_today_cache = (time.monotonic(), v)
+            self._focus_today_cache = (time.perf_counter(), v)
         return v
 
     def _observe_context(self, act, asm) -> None:
@@ -1066,19 +1071,19 @@ class FocusBuddyApp(QObject):
 
     def _streak_cached(self) -> int:
         c = getattr(self, "_streak_c", None)
-        if c is None or time.monotonic() - c[0] > 600:
-            c = (time.monotonic(), self.db.streak_days())
+        if c is None or time.perf_counter() - c[0] > 600:
+            c = (time.perf_counter(), self.db.streak_days())
             self._streak_c = c
         return c[1]
 
     def _sessions_today_cached(self) -> int:
         c = getattr(self, "_sess_c", None)
-        if c is None or time.monotonic() - c[0] > 120:
+        if c is None or time.perf_counter() - c[0] > 120:
             try:
                 n = int(self.db.day_summary(datetime.date.today().strftime("%Y-%m-%d"))["sessions"])
             except Exception:  # noqa: BLE001
                 n = 0
-            c = (time.monotonic(), n)
+            c = (time.perf_counter(), n)
             self._sess_c = c
         return c[1]
 
@@ -1132,7 +1137,7 @@ class FocusBuddyApp(QObject):
 
     def _intel_tick(self) -> None:
         """Once a minute: the coach's pre-emptive nudge, the end-of-day report."""
-        now = time.monotonic()
+        now = time.perf_counter()
         try:
             if (self.settings["coach_nudges"] and self.monitoring and self.focus.phase == Phase.IDLE
                     and self._idle_seconds() < 90 and now - self._last_nudge > 45 * 60
@@ -1228,7 +1233,8 @@ class FocusBuddyApp(QObject):
                    "walking_frequency", "idle_activity", "sound_level", "animation_smoothness",
                    "movement_smoothness", "secondary_motion", "physics_strength", "character_energy", "particles",
                    "time_of_day_behavior", "surprise_events", "debug_skeleton", "angry_reactions",
-                   "emotion_intensity", "renderer", "render_quality", "playfulness", "roaming_frequency",
+                   "emotion_intensity", "renderer", "render_quality", "performance_mode", "auto_quality",
+                   "shadows", "playfulness", "roaming_frequency",
                    "chatter", "focus_behavior", "roam_area", "quiet_mode", "leave_and_return", "lifelike_level"):
             self._apply_companion_settings()
             if key == "quiet_mode":

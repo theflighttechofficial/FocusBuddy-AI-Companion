@@ -617,11 +617,17 @@ class CompanionPage(Page):
                                          ("3d", "3D Procedural (lightweight)"), ("2d", "2D Fallback (flat vector art)")],
                 "3D models use your graphics card when available, otherwise a fast CPU renderer; "
                 "Illustrated draws the flat character-sheet art")
-        f.combo("render_quality", "3D quality", [("low", "Low (simple lighting, battery saver)"),
-                                                 ("normal", "Medium (lighting + shadows)"),
-                                                 ("high", "High (sharper, bolder outlines, 60 FPS)"),
-                                                 ("ultra", "Ultra (best quality, soft shadows)")])
-        f.toggle("auto_quality", "Adaptive 3D quality", "Lower the 3D quality automatically if your PC can't keep up")
+        f.combo("performance_mode", "Performance",
+                [("auto", "Auto - adapts to this PC (recommended)"), ("quality", "Best quality - never lowered"),
+                 ("balanced", "Balanced - medium quality, 60 FPS"), ("battery", "Battery saver - low quality, 30 FPS")],
+                "Auto checks your graphics card and memory, then raises or lowers the 3D detail live so the "
+                "companion always moves smoothly; battery saver mode is followed automatically")
+        f.combo("render_quality", "3D quality", [("normal", "Automatic (best this PC handles smoothly)"),
+                                                 ("low", "Low (simple lighting, battery saver)"),
+                                                 ("medium", "Medium (lighting + shadows)"),
+                                                 ("high", "High (sharper, bolder outlines)"),
+                                                 ("ultra", "Ultra (best quality, soft shadows)")],
+                "In Auto and Balanced performance this is the highest quality used")
         f.toggle("shadows", "Shadow", "Soft contact shadow under the character")
         f.slider("companion_opacity", "Opacity", 0.3, 1.0)
         f.combo("animation_fps", "Animation frame rate", [(30, "30 FPS (battery saver)"), (60, "60 FPS"),

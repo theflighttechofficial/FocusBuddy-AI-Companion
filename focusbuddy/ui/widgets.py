@@ -569,9 +569,14 @@ class CharacterPreview(QWidget):
         self.setFixedSize(size, size)
         self.spec = spec
         self.animator = Animator()
+        self.renderer = None                 # built in the background (preview_loader.py); portrait meanwhile
+        self._ticket = 0
+        self._portrait = None
+        self._fade_t0 = 0.0                  # portrait -> live model cross-fade start
+        self._wanted = False                 # the model is requested when the preview is first shown
         self._make_renderer()
         self.state = state
-        self._t0 = time.monotonic()
+        self._t0 = time.perf_counter()
         self._last = self._t0
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._frame)
@@ -588,16 +593,30 @@ class CharacterPreview(QWidget):
             self.timer.start(self.BASE_MS)
 
     BASE_MS = 66                             # ~15 FPS is plenty for a portrait
-    DUTY = 0.12                              # at most this share of the UI thread goes to the preview
+    DUTY = 0.2                               # at most this share of the UI thread goes to ALL previews together
+    _live: "weakref.WeakSet" = None          # previews that are animating right now
 
     def _frame(self):
-        # a 3D frame is costly on the UI thread: the preview keeps its share small, and nearly rests
-        # while its window is in the background, so the dashboard stays smooth
+        # a 3D frame is costly on the UI thread: all previews together keep their share small (the
+        # Companion page shows eight), previews scrolled out of view rest, and everything nearly
+        # rests while the window is in the background - so the dashboard stays smooth
+        live = CharacterPreview._live
+        if live is None:
+            import weakref
+            live = CharacterPreview._live = weakref.WeakSet()
         win = self.window()
         active = win is not None and win.isActiveWindow()
-        want = max(self.BASE_MS, int(1000 * self._cost / self.DUTY)) if active else 400
+        seen = not self.visibleRegion().isEmpty()
+        if seen:
+            live.add(self)
+        else:
+            live.discard(self)
+        n = max(1, len(live))
+        want = max(self.BASE_MS, int(1000 * self._cost * n / self.DUTY)) if active and seen else 400
         if self.timer.interval() != want:
             self.timer.setInterval(want)
+        if not seen:
+            return
         self._render()
         self.update()
 
@@ -605,7 +624,7 @@ class CharacterPreview(QWidget):
         """Draw the next frame into a cached image: a repaint for any other reason (a hover, an
         animation passing over it) only copies the image instead of rendering the model again."""
         from PySide6.QtGui import QImage
-        now = time.monotonic()
+        now = time.perf_counter()
         dt = now - self._last
         self._last = now
         t0 = time.perf_counter()
@@ -625,24 +644,102 @@ class CharacterPreview(QWidget):
             pose = self.animator.update(self.state, now, dt, None, None, look)
         else:
             pose = self.animator.pose(self.state, now, dt, 40, 75)
-        self.renderer.paint(g, QRectF(0, 0, self.width(), self.height()), pose, 1, self.state.value)
+        rect = QRectF(0, 0, self.width(), self.height())
+        fade = min(1.0, (now - self._fade_t0) / 0.35) if self._fade_t0 else 1.0
+        if self.renderer is None or fade < 1.0:
+            self._paint_portrait(g, rect, 1.0 if self.renderer is None else 1.0 - fade)
+        if self.renderer is not None:
+            g.setOpacity(fade)
+            self.renderer.paint(g, rect, pose, 1, self.state.value)
+            g.setOpacity(1.0)
+            if fade < 1.0:
+                QTimer.singleShot(16, self._fade_step)
         g.end()
         self._img = img
-        self._cost += (time.perf_counter() - t0 - self._cost) * 0.2
+        if self.renderer is not None:
+            self._cost += (time.perf_counter() - t0 - self._cost) * 0.2
+
+    def _fade_step(self) -> None:
+        try:
+            self._render()
+            self.update()
+        except RuntimeError:                 # deleted meanwhile
+            pass
+
+    def _paint_portrait(self, g: QPainter, rect: QRectF, opacity: float) -> None:
+        """The character's portrait (its sheet art) while the live model loads."""
+        if opacity <= 0.0:
+            return
+        if self._portrait is None:
+            self._portrait = False
+            try:
+                from PySide6.QtGui import QPixmap
+
+                from ..companion.illustrated import pack_dir
+                folder = pack_dir(self.spec.id)
+                if folder is not None and (folder / "portrait.webp").exists():
+                    pm = QPixmap(str(folder / "portrait.webp"))
+                    if not pm.isNull():
+                        self._portrait = pm
+            except Exception:  # noqa: BLE001 - a missing portrait just leaves the space empty
+                self._portrait = False
+        pm = self._portrait
+        if not pm:
+            return
+        w, h = rect.width() * 0.86, rect.height() * 0.86
+        k = min(w / pm.width(), h / pm.height())
+        tw, th = pm.width() * k, pm.height() * k
+        g.save()
+        g.setOpacity(opacity)
+        g.setRenderHint(QPainter.SmoothPixmapTransform, True)
+        g.drawPixmap(QRectF(rect.center().x() - tw / 2, rect.bottom() - th - rect.height() * 0.05, tw, th), pm,
+                     QRectF(pm.rect()))
+        g.restore()
 
     def _make_renderer(self):
         from ..companion.profile import get_profile
         from ..companion.renderer import DEFAULT_MODE
-        self.renderer = make_renderer(self.spec, DEFAULT_MODE["mode"], DEFAULT_MODE["quality"])
         self.animator.set_profile(get_profile(self.spec.id if self.spec.id in ("cat", "dog", "fox", "rabbit", "robot",
                                                                               "buddy") else self.spec.personality))
-        if hasattr(self.renderer, "rig"):
-            self.animator.set_rig(self.renderer.rig)
+        mode, quality = DEFAULT_MODE["mode"], DEFAULT_MODE["quality"]
+        from .preview_loader import PreviewLoader
+        loader = PreviewLoader.get()
+        if self._ticket:
+            loader.cancel(self._ticket)
+            self._ticket = 0
+        heavy = mode in ("production", "illustrated") and self.spec.skeleton != "sprite"
+        if heavy and not self._wanted:
+            return                           # not on screen yet: load when first shown (showEvent)
+        if heavy:
+            # heavy: build in the background, show the portrait meanwhile
+            spec = self.spec
+            self._ticket = loader.request(spec, mode, quality, lambda r, s=spec: self._renderer_ready(s, r))
+            return
+        self._set_renderer(make_renderer(self.spec, mode, quality), fade=False)
+
+    def _renderer_ready(self, spec: CharacterSpec, renderer) -> None:
+        self._ticket = 0
+        if spec is not self.spec:
+            return                           # the character changed meanwhile
+        if renderer is None:                 # couldn't be built off the UI thread: build it here
+            from ..companion.renderer import DEFAULT_MODE
+            renderer = make_renderer(self.spec, DEFAULT_MODE["mode"], DEFAULT_MODE["quality"])
+        self._set_renderer(renderer, fade=self._portrait not in (None, False) and self.isVisible())
+
+    def _set_renderer(self, renderer, fade: bool) -> None:
+        self.renderer = renderer
+        if hasattr(renderer, "rig"):
+            self.animator.set_rig(renderer.rig)
+        self._fade_t0 = time.perf_counter() if fade else 0.0
+        self._img = None
+        self.update()
 
     def set_character(self, spec: CharacterSpec):
-        if spec.id == getattr(self.spec, "id", None) and getattr(self, "renderer", None) is not None:
+        if spec.id == getattr(self.spec, "id", None) and (self.renderer is not None or self._ticket):
             return                           # (the dashboard refreshes often: no reload of the same model)
         self.spec = spec
+        self.renderer = None
+        self._portrait = None
         self._make_renderer()
         self._img = None
         self.update()
@@ -657,6 +754,10 @@ class CharacterPreview(QWidget):
         self.update()
 
     def showEvent(self, e):
+        if not self._wanted:
+            self._wanted = True
+            if self.renderer is None and not self._ticket:
+                self._make_renderer()
         if not self.timer.isActive():
             self.timer.start(self.BASE_MS)
         super().showEvent(e)
@@ -716,7 +817,7 @@ class CharacterPreview(QWidget):
             except Exception:  # noqa: BLE001 - a hit test is a nicety
                 part = "body"
         self.animator.on_event(f"poke_{part}", 1.0)
-        now = time.monotonic()
+        now = time.perf_counter()
         if not self._react_until:
             self._react_from = self.state
         if self.state in (S.IDLE, S.SITTING, S.PETTED, S.WAVING):
@@ -737,7 +838,7 @@ class CharacterPreview(QWidget):
         self.clicked.emit()
 
     def _paint_fx(self, g: QPainter) -> None:
-        now = time.monotonic()
+        now = time.perf_counter()
         self._fx = [f for f in self._fx if now - f["t0"] < f["life"]]
         if not self._fx:
             return

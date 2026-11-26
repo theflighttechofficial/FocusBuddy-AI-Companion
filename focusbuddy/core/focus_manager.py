@@ -46,14 +46,15 @@ class FocusTimer:
     def elapsed(self) -> float:
         if self.phase in (Phase.FOCUS, Phase.PAUSED):
             run = (self.clock.now() - self._run_since) if self._run_since is not None else 0.0
-            return min(self.planned, self._accum + run)
+            # the wall clock can be set back (or synced) mid-session: never count negative time
+            return max(0.0, min(self.planned, self._accum + max(0.0, run)))
         return 0.0
 
     def remaining(self) -> float:
         if self.phase in (Phase.FOCUS, Phase.PAUSED):
             return max(0.0, self.planned - self.elapsed())
         if self.phase == Phase.BREAK:
-            return max(0.0, self.break_planned - (self.clock.now() - self._break_since))
+            return max(0.0, min(self.break_planned, self.break_planned - (self.clock.now() - self._break_since)))
         return 0.0
 
     def progress(self) -> float:

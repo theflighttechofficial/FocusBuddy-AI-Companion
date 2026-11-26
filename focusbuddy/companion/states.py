@@ -100,7 +100,7 @@ class InvalidTransition(ValueError):
 class StateMachine:
     def __init__(self, initial: S = S.IDLE, now: Callable[[], float] | None = None):
         import time
-        self._now = now or time.monotonic
+        self._now = now or time.perf_counter
         self.state = initial
         self.previous: Optional[S] = None
         self.entered_at = self._now()

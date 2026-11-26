@@ -3,6 +3,41 @@
 All notable changes to FocusBuddy. Full engineering notes for each release are in
 [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
+## [Unreleased]
+
+### Added
+- **Performance mode** (Settings → Companion → Appearance): *Auto* (default), *Best quality*,
+  *Balanced* and *Battery saver*. Auto profiles the PC once (graphics adapter, CPU cores, memory,
+  battery / battery saver) to choose a starting quality and a ceiling. It then raises or lowers the
+  3D detail live from measured frame times, with hysteresis so it never flips back and forth.
+  Windows battery saver switches to the lowest quality at 30 FPS automatically.
+- Frames are synchronised to the display refresh on Windows (`companion/pacing.py`). The old 16 ms
+  timer ran at 62.5 Hz against a 60 Hz screen, so one frame in about 25 was doubled or dropped.
+- Pose inertialization (`companion/inertia.py`): when the rig makes a discrete decision (which paw
+  waves, the tail lifted off the floor, a clip starting), the jump is absorbed and fades over about
+  0.2 s instead of appearing as a one-frame cut. Continuous motion passes through unchanged.
+  Planted legs are excluded, so feet never slide.
+- A `tests/` suite (the CI job ran `pytest` with no tests).
+
+### Fixed
+- **Walk judder on Windows**: animation used `time.monotonic()`, which only ticks every 15.6 ms on
+  Windows. Frame deltas jumped between 0, 15 and 31 ms. All timing now uses `time.perf_counter()`.
+- **Blink and talk hitches**: every blink or mouth frame re-uploaded the whole 2048–4096 px face
+  texture (25–30 ms). Only the changed eye and mouth tiles are sent now, and the redrawn lids are
+  cached. Output is pixel-identical.
+- **Dashboard took over 20 s to open**: the Companion page built eight full 3D previews up front.
+  Pages are now built on first use. Previews load in the background (portrait first, then a
+  cross-fade to the live model) and share one frame budget. Typical open time is about 1.5 s.
+- Changing any companion setting rebuilt the 3D renderer (a visible hitch) and reset the adapted
+  quality.
+- After startup or a character switch, the first slow frame throttled the companion to 8 FPS for
+  about 1.5 s.
+- Root-caused pops: the jump take-off and landing pitch, the sitting tail flipping sides, and the
+  waving hand switching arms mid-wave.
+- Changing *Shadow* now applies immediately. *Adaptive 3D quality* became the Performance mode;
+  if it was switched off, the mode starts as *Best quality*.
+- The focus timer no longer counts negative time when the system clock is set back.
+
 ## [2.3.0] - 2026-11-13
 
 ### Changed

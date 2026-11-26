@@ -393,7 +393,7 @@ class HeroFx(QWidget):
         self.bubbles = [(r.random(), r.random(), 0.25 + 0.75 * r.random() ** 2, 0.025 + 0.04 * r.random(),
                          r.uniform(0.01, 0.03), r.randint(22, 52)) for _ in range(count)]
         self.sparkles = [(r.random(), r.random(), r.random() * 6.28, r.uniform(1.2, 2.4)) for _ in range(9)]
-        self._t0 = time.monotonic()
+        self._t0 = time.perf_counter()
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
         card.installEventFilter(self)
@@ -427,7 +427,7 @@ class HeroFx(QWidget):
         clip.addRoundedRect(body, self.card.radius, self.card.radius)
         g.setClipPath(clip)
         g.setPen(Qt.NoPen)
-        t = time.monotonic() - self._t0
+        t = time.perf_counter() - self._t0
         H = body.height()
         for x, ph, rad, sp, sway, a in self.bubbles:
             u = (ph + t * sp) % 1.0                         # 0 bottom .. 1 top

@@ -142,7 +142,8 @@ DEFAULT_SETTINGS: dict = {
                                       # (character-sheet art) / 3d (procedural 3D) / 2d (flat vector art)
     "renderer_version": 1,            # 3 = the 3D character models were offered as the default
     "render_quality": "normal",       # low / medium (= normal) / high / ultra
-    "auto_quality": True,             # step 3D quality down if frames keep missing their budget
+    "auto_quality": True,             # adapt the 3D quality to the measured frame times
+    "performance_mode": "auto",       # auto (adapts to this PC) | quality | balanced | battery
     "shadows": True,                  # contact shadow under the character
     "cursor_reactions": "subtle",     # off | subtle | playful  (eyes / head follow, curiosity, pounce)
     "stumbles": True,                 # very rare trip / fall-over moments (never during focus)

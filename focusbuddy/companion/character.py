@@ -29,6 +29,8 @@ from .behavior import Behavior, Rect
 from .life import Life
 from .characters import CharacterSpec
 from .overlay import BubbleWindow, CompanionWindow
+from .pacing import VsyncPacer
+from .performance import TIERS, QualityGovernor, plan as perf_plan, probe as perf_probe, tier_index
 from .particles import ParticleSystem
 from .profile import get_profile
 from .renderer import GROUND_MARGIN, UNITS, make_renderer
@@ -157,7 +159,15 @@ class Companion(QObject):
         super().__init__()
         self.spec = spec
         self.render_mode = "2d"
-        self.render_quality = "normal"
+        self.render_quality = "normal"         # the quality the 3D renderer uses right now (governed)
+        self.preferred_quality = "normal"      # the user's choice (Settings -> 3D quality)
+        self.performance_mode = "auto"         # auto | quality | balanced | battery (performance.py)
+        self.device = None                     # DeviceProfile, probed on first use
+        self.governor = QualityGovernor()
+        self.perf = {"start": "medium", "ceiling": "high", "adaptive": True, "fps_cap": 0, "particles": True,
+                     "mode": "auto"}
+        self._user_particles = True
+        self._power_check = 0.0
         self.renderer = make_renderer(spec, self.render_mode, self.render_quality)
         self.env = env or QtEnvironment()
         self.personality = personality
@@ -174,7 +184,7 @@ class Companion(QObject):
         self._last_step_sound = 0.0
         self._tick_errors = 0
         self._last_paint = 0.0
-        self.auto_quality = True        # step 3D quality down when frames keep missing their budget
+        self.auto_quality = True        # adapt the 3D quality to the measured frame times (performance.py)
         self.render_fallback = ""       # "2d" after a runtime 3D failure
         self.shadows = True
         self.behavior.on_land = self._on_land
@@ -189,7 +199,7 @@ class Companion(QObject):
         self.debug = None
         self._hovered = False
         self._pose = None
-        self._last = time.monotonic()
+        self._last = time.perf_counter()
         self._last_raise = 0.0
         self._idle_check = 0.0
         self._fps = 60.0
@@ -227,7 +237,12 @@ class Companion(QObject):
 
         self.timer = QTimer(self)
         self.timer.setTimerType(Qt.PreciseTimer)
-        self.timer.timeout.connect(self._tick)
+        self.timer.timeout.connect(self._on_timer)
+        # frames follow the display's refresh where the compositor offers it (pacing.py); the timer
+        # then only stands guard (and takes over if the display clock stops pacing)
+        self.pacer = VsyncPacer(self)
+        self.pacer.pulse.connect(self._on_pulse)
+        self._tick_interval = 1.0 / self.target_fps     # wanted time between ticks (s): lower when calm
         self._place_window()
 
     def _win_size(self) -> tuple[int, int]:
@@ -255,12 +270,18 @@ class Companion(QObject):
     def start(self) -> None:
         if self.visible_wanted and not self.life_hidden:
             self.window.show()
-        self._last = time.monotonic()
+        self._last = time.perf_counter()
         self._set_timer_resolution(True)
-        self.timer.start(int(1000 / self.target_fps))
+        if self.pacer.start():
+            self.timer.start(self.WATCHDOG_MS)
+        else:
+            self.timer.start(int(1000 / self.target_fps))
+
+    WATCHDOG_MS = 100
 
     def stop(self) -> None:
         self.timer.stop()
+        self.pacer.stop()
         self._set_timer_resolution(False)
         self.window.hide()
         self.bubble.hide_now()
@@ -305,6 +326,8 @@ class Companion(QObject):
     def set_character(self, spec: CharacterSpec) -> None:
         self.spec = spec
         self.renderer = make_renderer(spec, self.render_mode, self.render_quality)
+        self._reset_paint_cost()
+        self._apply_tier(self.render_quality)
         self.set_personality(self.personality)
         self._attach_rig()
         self.behavior.set_species(self.animator.species)
@@ -323,7 +346,7 @@ class Companion(QObject):
         from ..config import SIZE_RANGE
         factor = max(min(0.5, SIZE_RANGE[0]), min(SIZE_RANGE[1], factor))      # (it was capped at 2.0)
         if animate and self.timer.isActive():
-            self._size_anim = (self.size_factor, factor, time.monotonic())
+            self._size_anim = (self.size_factor, factor, time.perf_counter())
         else:
             self._apply_size(factor)
 
@@ -351,8 +374,34 @@ class Companion(QObject):
 
     def set_fps(self, fps: int) -> None:
         self.target_fps = max(20, min(144, int(fps)))
-        if self.timer.isActive():
+        self._tick_interval = 1.0 / self.target_fps
+        if self.timer.isActive() and not self.pacer.running:
             self.timer.setInterval(int(1000 / self.target_fps))
+
+    # ------------------------------------------------------------ pacing
+    def _tick_period(self) -> float:
+        """Time between two loop wake-ups (display refresh, or the timer's interval)."""
+        if self.pacer.running:
+            return max(0.004, float(self.pacer.period))
+        return max(0.004, self.timer.interval() / 1000.0)
+
+    def _on_pulse(self) -> None:
+        self.pacer.consumed()
+        if not self.pacer.available:              # the display clock gave up: the timer drives again
+            if self.timer.isActive():
+                self.timer.setInterval(int(1000 * self._tick_interval))
+            return
+        # tick when the wanted interval is (within half a refresh) due: 60 FPS on a 60 Hz display,
+        # every 2nd refresh on 120 Hz, 30 / 15 FPS while calm / asleep - always on a refresh
+        if time.perf_counter() - self._last >= self._tick_interval - 0.5 * self._tick_period():
+            self._tick()
+
+    def _on_timer(self) -> None:
+        if self.pacer.running and self.pacer.available:
+            # watchdog only: the display pulses drive the loop; step in if they stall
+            if time.perf_counter() - self._last < self.WATCHDOG_MS / 1000.0 * 0.9:
+                return
+        self._tick()
 
     # GPU tiers render every frame the window moves (smooth motion); adaptive quality steps down
     # if a machine can't keep up
@@ -362,28 +411,83 @@ class Companion(QObject):
 
     def set_render_mode(self, mode: str, quality: str = "normal") -> None:
         """"production" (skinned GLB characters), "3d" (procedural 3D) or "2d". Same skeleton / animation.
-        Quality "normal" = automatic: medium on the CPU renderer, high when the GPU renderer is available."""
+        ``quality`` is the user's preference ("normal" = automatic); the quality actually used comes
+        from the performance plan (device class, performance mode) and the live governor."""
         mode = mode if mode in ("illustrated", "production", "3d") else "2d"
-        if mode == self.render_mode and quality == self.render_quality:
-            return
-        self.render_mode, self.render_quality = mode, quality
-        self.renderer = make_renderer(self.spec, mode, quality)
-        if quality in ("normal", "auto") and getattr(self.renderer, "backend", None) == "gpu" and \
-                hasattr(self.renderer, "set_quality"):
-            self.renderer.set_quality("high")
+        if mode == self.render_mode and quality == self.preferred_quality:
+            return                      # unchanged: keep the renderer and the governed quality
+        self.render_mode, self.preferred_quality = mode, quality
+        self._replan()
+        self.renderer = make_renderer(self.spec, mode, self.render_quality)
+        self._reset_paint_cost()
+        self._apply_tier(self.render_quality)
         self._attach_rig()
         self.behavior.press_tip = self.renderer.press_point()
         self.window.update()
-        log.info("Renderer mode=%s quality=%s backend=%s", mode, quality, getattr(self.renderer, "backend", "2d"))
+        log.info("Renderer mode=%s quality=%s (preferred %s, %s) backend=%s", mode, self.render_quality, quality,
+                 self.performance_mode, getattr(self.renderer, "backend", "2d"))
+
+    def set_performance(self, mode: str) -> None:
+        """Performance mode: auto (adapts to the device) | quality | balanced | battery."""
+        mode = mode if mode in ("auto", "quality", "balanced", "battery") else "auto"
+        if mode == self.performance_mode and self.device is not None:
+            return
+        self.performance_mode = mode
+        self._replan()
+        self._apply_tier(self.render_quality)
+        log.info("Performance mode=%s device=%s -> quality %s (ceiling %s)", mode, self.device.summary(),
+                 self.render_quality, self.perf["ceiling"])
+
+    def _replan(self) -> None:
+        if self.device is None:
+            try:
+                gpu = getattr(getattr(self.renderer, "_glm", None) or getattr(self.renderer, "_gl", None),
+                              "renderer_name", None)
+                self.device = perf_probe(gpu)
+            except Exception:  # noqa: BLE001 - never block the companion on a probe
+                from .performance import DeviceProfile
+                self.device = DeviceProfile()
+        self.perf = perf_plan(self.performance_mode, self.preferred_quality, self.device)
+        self.render_quality = self.perf["start"]
+        self.governor.reset(time.perf_counter())
+        self.particles.enabled = self._user_particles and self.perf["particles"]
+        if not self.particles.enabled:
+            self.particles.clear()
+
+    def _apply_tier(self, tier: str) -> None:
+        self.render_quality = tier
+        if hasattr(self.renderer, "set_quality") and getattr(self.renderer, "quality", None) != tier:
+            self.renderer.set_quality(tier)
+            self._reset_paint_cost()
+
+    def _check_power(self, now: float) -> None:
+        """Auto mode follows the power source: battery saver -> lowest quality, unplugged -> at most
+        medium (checked every 30 s; cheap)."""
+        if now - self._power_check < 30.0 or self.device is None or self.performance_mode != "auto":
+            return
+        self._power_check = now
+        from .performance import power_status
+        on_batt, saver = power_status()
+        if (on_batt, saver) != (self.device.on_battery, self.device.battery_saver):
+            self.device.on_battery, self.device.battery_saver = on_batt, saver
+            old = self.render_quality
+            self._replan()
+            # plugging back in: keep the current quality and let the governor climb from there
+            if not saver and tier_index(old) <= tier_index(self.perf["ceiling"]):
+                self.render_quality = old
+            self._apply_tier(self.render_quality)
+            log.info("Power changed (battery=%s saver=%s) - quality %s", on_batt, saver, self.render_quality)
 
     @property
     def render_fps(self) -> int:
         """3D frames are rendered at most this often; the window moves together with each frame."""
+        cap = int(self.perf.get("fps_cap") or 0)
+        target = min(self.target_fps, cap) if cap else self.target_fps
         backend = getattr(self.renderer, "backend", None)
         if backend is None:
-            return self.target_fps
+            return target
         table = self.RENDER_FPS["gpu" if str(backend).startswith("gpu") else "cpu"]
-        return min(self.target_fps, table.get(self.render_quality, 24))
+        return min(target, table.get(self.render_quality, 24))
 
     @property
     def paint_fps(self) -> int:
@@ -411,8 +515,9 @@ class Companion(QObject):
         b.energy_setting = (-15.0, 0.0, 15.0)[lv(character_energy)]
         b.time_of_day_enabled = bool(time_of_day)
         b.brain.surprises = bool(surprises)
-        self.particles.enabled = bool(particles)
-        if not particles:
+        self._user_particles = bool(particles)
+        self.particles.enabled = self._user_particles and self.perf.get("particles", True)
+        if not self.particles.enabled:
             self.particles.clear()
 
     def set_windows(self, windows: list[dict] | None) -> None:
@@ -439,7 +544,7 @@ class Companion(QObject):
     def _talk(self, text: str, duration: float | None = None) -> None:
         """Lip motion, nods and brow accents that follow the words in the bubble."""
         try:
-            self.animator.talk(text, time.monotonic(), duration)
+            self.animator.talk(text, time.perf_counter(), duration)
         except Exception:  # noqa: BLE001 - talking is decoration and must never break speech
             pass
 
@@ -623,7 +728,7 @@ class Companion(QObject):
 
     # -------------------------------------------------------------- frame
     def _tick(self) -> None:
-        now = time.monotonic()
+        now = time.perf_counter()
         dt = now - self._last
         self._last = now
         if dt > 0:
@@ -719,7 +824,8 @@ class Companion(QObject):
             aw = QApplication.activeWindow()
             duty = 0.28 if aw is not None and aw is not self.window else 0.5
             rfps = max(8, min(rfps, int(duty / cost)))
-        if rfps > 0 and now - self._last_paint >= 1.0 / rfps - 0.002:
+        # due within half a tick: a 30 FPS frame lands on every 2nd tick even when ticks jitter
+        if rfps > 0 and now - self._last_paint >= 1.0 / rfps - 0.5 * self._tick_period():
             self._last_paint = now
             self._present()
         elif rfps <= 0:
@@ -727,6 +833,7 @@ class Companion(QObject):
         if self.debug is not None:
             self.debug.update_info()
 
+        self._check_power(now)
         # Keep above other "topmost" windows now and then
         if now - self._last_raise > 6.0 and self.window.isVisible():
             self._last_raise = now
@@ -744,6 +851,9 @@ class Companion(QObject):
             interval = 66
         else:
             interval = max(int(1000 / self.target_fps), 33)
+        self._tick_interval = 1.0 / self.target_fps if busy else interval / 1000.0
+        if self.pacer.running and self.pacer.available:
+            interval = self.WATCHDOG_MS
         if self.timer.interval() != interval:
             self.timer.setInterval(interval)
 
@@ -774,12 +884,24 @@ class Companion(QObject):
         try:
             self._paint_frame(g, rect)
         finally:
-            c = time.perf_counter() - t0
-            self._paint_cost = c if not getattr(self, "_paint_cost", 0.0) else self._paint_cost * 0.9 + c * 0.1
+            self._note_paint_cost(time.perf_counter() - t0)
+
+    def _note_paint_cost(self, c: float) -> None:
+        """Running average of the frame cost (feeds the UI-thread duty cap). One-off hitches - the first
+        frame of a renderer uploads its meshes and textures - are clipped, so they can't throttle the
+        companion to a crawl for seconds afterwards."""
+        avg = getattr(self, "_paint_cost", 0.0)
+        if not avg:
+            self._paint_cost = min(c, 0.02)
+            return
+        self._paint_cost = avg * 0.9 + min(c, avg * 3.0 + 0.002) * 0.1
+
+    def _reset_paint_cost(self) -> None:
+        self._paint_cost = 0.0
 
     def _paint_frame(self, g, rect: QRectF) -> None:
         if self._pose is None:
-            self._pose = self.animator.update(self.behavior.state, time.monotonic(), 0.0)
+            self._pose = self.animator.update(self.behavior.state, time.perf_counter(), 0.0)
         fx, fy = self._frac
         l, t, _, _ = window_pads(self.px)
         r = QRectF(l + fx, t + fy, self.px, self.px)
@@ -815,7 +937,6 @@ class Companion(QObject):
                 self.renderer = make_renderer(self.spec, "2d", self.render_quality)
                 self._attach_rig()
                 self.renderer.paint(g, r, self._pose, 1, self.behavior.state.value, debug=self.debug_draw)
-        self._budget_check()
         # ROOT_MOTION clips move the character through the desktop world (HYBRID / IN_PLACE don't)
         rm = getattr(self.renderer, "root_motion_px", None)
         if rm is not None:
@@ -828,30 +949,27 @@ class Companion(QObject):
         if len(self.particles):
             self.particles.paint(g, self.window.x(), self.window.y())
 
-    def _budget_check(self) -> None:
-        """Adaptive quality: if 3D frames keep blowing their budget, step the quality down once in a while
-        (never forces 60 FPS on a GPU that can't do it; the window itself keeps moving at full rate)."""
-        ms = getattr(self.renderer, "last_ms", 0.0)
-        if not ms or not self.auto_quality:
+    def _budget_check(self, frame_ms: float = 0.0, now: float | None = None) -> None:
+        """Adaptive quality (performance.py): the governor steps the 3D quality down when frames keep
+        using too much of their budget and back up after a long calm stretch."""
+        if not frame_ms or not self.auto_quality or not self.perf.get("adaptive", True):
             return
-        self._render_ms_avg = getattr(self, "_render_ms_avg", ms) * 0.95 + ms * 0.05
+        if not hasattr(self.renderer, "set_quality") or getattr(self.renderer, "backend", None) is None:
+            return
+        now = time.perf_counter() if now is None else now
         budget = 1000.0 / max(1, self.render_fps)
-        if self._render_ms_avg > budget * 0.85:
-            self._over_budget = getattr(self, "_over_budget", 0) + 1
-        else:
-            self._over_budget = 0
-        if self._over_budget > 90:
-            from .render3d import Renderer3D
-            q = Renderer3D.tier_name(self.render_quality)
-            i = self.QUALITY_ORDER.index(q)
-            self._over_budget = 0
-            if i > 0 and hasattr(self.renderer, "set_quality"):
-                new = self.QUALITY_ORDER[i - 1]
-                log.info("3D frame time %.1f ms over budget %.1f ms - quality %s -> %s",
-                         self._render_ms_avg, budget, q, new)
-                self.render_quality = new
-                self.renderer.set_quality(new)
-                self._render_ms_avg = budget * 0.5
+        i = tier_index(self.render_quality)
+        ceil = tier_index(self.perf.get("ceiling", "ultra"))
+        step = self.governor.feed(frame_ms, budget, now, can_up=i < ceil, can_down=i > 0)
+        if step is None:
+            return
+        new = TIERS[max(0, min(ceil, i + (1 if step == "up" else -1)))]
+        if new == self.render_quality:
+            return
+        log.info("3D frames %s budget %.1f ms - quality %s -> %s", "under" if step == "up" else "over",
+                 budget, self.render_quality, new)
+        self._apply_tier(new)
+        self.governor.changed(step, now)
 
     def _window_target(self) -> tuple[int, int, float, float]:
         margin = GROUND_MARGIN * self.px / UNITS
@@ -864,6 +982,7 @@ class Companion(QObject):
     def _present(self) -> None:
         """Render this moment's frame off-screen, then move the window there and show it together."""
         from PySide6.QtGui import QImage, QPainter as _QP
+        t_frame = time.perf_counter()
         w = self.window
         xi, yi, fx, fy = self._window_target()
         self._frac = (fx, fy)
@@ -893,6 +1012,7 @@ class Companion(QObject):
             return
         g.end()
         w.present(img, xi, yi)
+        self._budget_check((time.perf_counter() - t_frame) * 1000.0)
 
     def _place_window(self) -> None:
         margin = GROUND_MARGIN * self.px / UNITS

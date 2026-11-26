@@ -105,7 +105,7 @@ class Tray(QObject):
     def notify(self, title: str, message: str, key: str | None = None, min_interval: float = 60.0) -> bool:
         """Desktop notification with per-key rate limiting (avoid spam)."""
         key = key or message
-        now = time.monotonic()
+        now = time.perf_counter()
         if now - self._last_notify.get(key, -1e9) < min_interval:
             return False
         self._last_notify[key] = now

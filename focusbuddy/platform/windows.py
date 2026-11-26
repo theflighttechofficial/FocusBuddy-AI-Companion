@@ -158,7 +158,7 @@ class WindowsWindowManager(WindowManager):
 
     def _exe_path(self, pid: int) -> tuple[str, str]:
         """(exe name lower-case, full image path) - cached for two minutes per pid."""
-        now = time.monotonic()
+        now = time.perf_counter()
         cached = self._path_cache.get(pid)
         if cached and now - cached[2] < 120:
             return cached[0], cached[1]

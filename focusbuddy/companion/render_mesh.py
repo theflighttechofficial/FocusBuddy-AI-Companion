@@ -404,8 +404,11 @@ class MeshRenderer3D(Renderer3D):
         return None, None
 
     def _bump_face(self) -> None:
+        # painted faces say which texture regions changed, so the GPU re-sends only those
+        dirty = self.painted.dirty if getattr(self, "painted", None) is not None else None
         for md in getattr(self, "_face_mats", None) or [self._face_mat]:
             md.tex_version = getattr(md, "tex_version", 0) + 1
+            md.tex_dirty = dirty
 
     def _init_painted_face(self) -> None:
         from .face_paint import make_painted_face
@@ -443,7 +446,7 @@ class MeshRenderer3D(Renderer3D):
             return
         if self.sheet_face is None or getattr(self, "expression_lock", None):
             return
-        name = self.expression_picker.pick(pose, state, time.monotonic())
+        name = self.expression_picker.pick(pose, state, time.perf_counter())
         if self.sheet_face.show(name):
             self._bump_face()
 

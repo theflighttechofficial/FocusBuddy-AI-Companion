@@ -115,7 +115,7 @@ class Behavior:
                  now: Callable[[], float] | None = None, profile: CharacterProfile | None = None):
         import time
         self.env = env
-        self._now = now or time.monotonic
+        self._now = now or time.perf_counter
         self.rng = random.Random(seed)
         self.profile = profile or get_profile("cat")
         self.sm = StateMachine(S.IDLE, now=self._now)

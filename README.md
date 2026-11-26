@@ -27,12 +27,27 @@
 
 No installer? Run from source in [three commands](#run-from-source), or try the safe demo with `python main.py --demo`.
 
+## What's new: smoother on every PC
+
+This update makes the companion and the app fluid, especially on Windows laptops and low-end PCs.
+
+| Area | Before | Now |
+|---|---|---|
+| Walking and running | Judder: frame steps jumped between 0, 15 and 31 ms on Windows | Even steps, frames synced to your display's refresh |
+| Blinking and talking | A 25–30 ms freeze on every blink frame | Only the changed eye and mouth pixels go to the GPU |
+| State changes | Ears, tails and hands could jump in a single frame | Every change blends; worst jump reduced by about 3× |
+| Opening the dashboard | Over 20 seconds on the first open | About 1.5 seconds |
+| Slow or older PCs | Quality only went down, never back up | Detects your hardware and adjusts detail live, both ways |
+| Laptops on battery | Same work as when plugged in | Follows Windows battery saver automatically |
+
+See the [changelog](CHANGELOG.md) for the full list.
+
 ---
 
 <div align="center">
 <img src="docs/lineup.png" alt="The eight FocusBuddy companions: cat, dog, fox, rabbit, robot, Study Buddy, Study Girl and Saree Girl" width="100%">
 
-[Features](#features) · [Screenshots](#screenshots) · [How it works](#how-it-works) · [Install](#installation) · [Browser extension](#browser-extension) · [Privacy](#privacy--safety) · [Changelog](CHANGELOG.md) · [Technical reference](docs/TECHNICAL.md)
+[What's new](#whats-new-smoother-on-every-pc) · [Features](#features) · [Screenshots](#screenshots) · [How it works](#how-it-works) · [Install](#installation) · [Browser extension](#browser-extension) · [Privacy](#privacy--safety) · [Changelog](CHANGELOG.md) · [Technical reference](docs/TECHNICAL.md)
 </div>
 
 FocusBuddy is a desktop pet with a job. Your companion wanders your screen, naps on the taskbar and watches your cursor. When you slip onto a distracting site, it notices, walks over to that window and asks if you want to get back to work. If you allowed it, it presses the window's close button with its paw.
@@ -44,9 +59,16 @@ It asks before it acts. It says *"Hey… I think we wandered off task. Want to g
 **A companion that feels alive**
 - Eight rigged, textured **3D characters**: cat, dog, fox, rabbit, robot, Study Buddy, Study Girl and Saree Girl. Each has its own personality, gait and dialogue.
 - Walks, jogs, runs, sprints, sits, sleeps, stretches and plays, with planted feet, IK and spring physics on tails and ears.
+- **No cuts between moves.** Any sudden change in a pose eases in over about 0.2 seconds instead of popping. Planted feet stay where they are.
 - 25 emotions, read from body language and faces that blink, squint and smile.
 - A daily routine: it wakes up, wanders, gets into mischief, leaves and comes back, and remembers you between launches.
 - Click, drag, pet or poke it. Resize it with **Ctrl + mouse wheel**, from small up to a quarter of your screen.
+
+**Smooth on any PC**
+- **Performance mode** in *Settings → Companion → Appearance*: **Auto** (default), Best quality, Balanced or Battery saver.
+- Auto checks your graphics card, CPU and memory, picks a starting quality, then raises or lowers the 3D detail live from real frame times. It waits before trying again, so it never flickers between levels.
+- Frames follow your display's refresh rate. Battery saver drops to low detail at 30 FPS on its own.
+- Heavy work stays off the screen's critical path: dashboard pages build when you first open them, and character previews load in the background.
 
 **A focus engine that is fair**
 - Knows the active app and, through the browser extension, the **exact website**.
@@ -206,6 +228,7 @@ The extension sends only the active tab's address, and only to `127.0.0.1:47621`
 | `python main.py --playground` | Open the Companion Playground |
 | `python main.py --character-showcase --character fox` | Watch one character perform every action |
 | `python main.py --self-test` | Load and render every character offscreen, then exit 0 or 1 |
+| `FocusBuddy.exe --self-test --self-test-report selftest.json` | The same check for a built app, with a JSON report |
 
 **Try it on your real browser:**
 
@@ -213,6 +236,8 @@ The extension sends only the active tab's address, and only to `127.0.0.1:47621`
 2. Right-click the companion and choose *Start Focus Session → 25 minutes*.
 3. Open youtube.com and stay there. Within a minute or two, the companion walks over and asks.
 4. Go back to your editor. The companion celebrates and the Statistics page updates.
+
+**If the companion feels slow:** open *Settings → Companion → Appearance* and check that *Performance* is set to **Auto**. Pick **Battery saver** on very old PCs. The log (`%LOCALAPPDATA%\FocusBuddy\logs\focusbuddy.log`) records every quality change and the device class it detected.
 
 **Shortcuts:** `Ctrl+K` search · `Ctrl+1`–`9` pages · `Ctrl+H` hide or show the companion · `Ctrl+L` lock · `Ctrl+,` settings · `F1` help.
 
@@ -238,6 +263,7 @@ The extension sends only the active tab's address, and only to `127.0.0.1:47621`
 |---|---|
 | App and UI | Python 3.10+, PySide6 (Qt 6), OpenGL |
 | 3D renderer | NumPy CPU rasteriser with a GPU skinning path; GLB / glTF characters with PBR textures |
+| Smoothness | Display-synced frame loop, pose inertialization, adaptive quality governor, background asset loading |
 | Windows integration | Win32 through `ctypes` only: no pywin32, no hooks, no keylogger |
 | Storage | SQLite (standard library) |
 | Browser | Manifest V3 extension in plain JavaScript |
@@ -250,7 +276,8 @@ FocusBuddy/
 ├── main.py               entry point (CLI flags, single instance)
 ├── focusbuddy/
 │   ├── core/             monitor, rules, scoring, interventions, focus timer, stats
-│   ├── companion/        rig, gaits, IK, actions, brain, emotions, 3D renderers, overlay
+│   ├── companion/        rig, gaits, IK, actions, brain, emotions, 3D renderers, overlay,
+│   │                     pacing (display sync), performance (device profile + governor), inertia
 │   ├── blocking/         safety guard, tab and app actions
 │   ├── browser/          localhost bridge to the extension, title parser
 │   ├── intel/            coach, reports, routines, chat assistant
@@ -260,6 +287,7 @@ FocusBuddy/
 ├── browser_extension/    FocusBuddy Connector (Chrome / Edge / Firefox)
 ├── assets/               characters (GLB + art), dialogue, motion capture, icons
 ├── installer/            Inno Setup script
+├── tests/                pytest suite (timing, performance governor, inertialization, faces, runtime)
 └── tools/                asset pipeline, rigging, screenshots, validators
 ```
 
@@ -269,10 +297,13 @@ The platform code sits behind `platform/base.py`. A macOS or Linux backend only 
 
 ```bat
 pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest -q                      # run the test suite
 python -m tools.validate_asset --all     # check every bundled character
 python main.py --self-test               # render every character offscreen
 python tools/screenshots.py out/         # render every dashboard page with sample data
 ```
+
+Timing rule for contributors: use `time.perf_counter()` for anything frame-related. `time.monotonic()` only updates every 15.6 ms on Windows and makes motion judder; a test fails if it appears in `focusbuddy/`.
 
 The [technical reference](docs/TECHNICAL.md) covers the character system, how to add your own GLB character, animations and emotions, the database schema, configuration options and troubleshooting.
 
