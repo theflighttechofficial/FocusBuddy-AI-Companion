@@ -92,5 +92,6 @@
   "wave_up": true,
   "arm_out": 0.06,
   "arm_fwd": 0.04,
-  "mocap": true
+  "mocap": true,
+  "head_grow": 1.5
 }

@@ -98,7 +98,9 @@ MOCAP_STATES = {"SITTING": "sit", "READING": "sit", "FOCUS_MODE": "sit", "SLEEPI
                 "STRETCHING": "stretch", "YAWNING": "yawn",
                 "CELEBRATING": "celebrate", "CONFUSED": "shrug"}
 # action -> motion-capture clip (gestures play as a layer over the idle / posture)
-MOCAP_ACTIONS = {"WAVE": "wave", "HELLO": "wave", "GREET": "wave_big", "FAREWELL": "wave_big", "WAVE_BIG": "wave_big",
+# (the hello WAVE is procedural for the people - skinning._human_gestures: the captured one raised a stiff
+# arm and barely waved, and had to be squeezed to twice its speed to fit the action)
+MOCAP_ACTIONS = {"GREET": "wave_big", "FAREWELL": "wave_big", "WAVE_BIG": "wave_big",
                  "BOW": "bow", "CELEBRATE": "celebrate", "CHEER": "celebrate", "VICTORY_DANCE": "dance",
                  "DANCE": "dance", "LAUGH": "laugh", "LAUGH_HARD": "laugh", "CRY": "cry", "SCARED": "scared",
                  "ANGRY": "angry", "TANTRUM": "angry", "STOMP": "angry", "SHRUG": "shrug",

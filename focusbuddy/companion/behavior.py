@@ -730,7 +730,7 @@ class Behavior:
         elif kind == "look":
             steps = [("look", A.USER, None, 1.4, S.IDLE)]
         else:
-            steps = [("look", A.USER, None, 0.3, None), ("state", S.WAVING, 1.6)]
+            steps = [("look", A.USER, None, 0.3, None), ("state", S.WAVING, 1.1)] + self.followup_steps()
         self._start_plan(steps, mode="auto", priority=Priority.INTERACTION)
 
     def pet(self) -> None:
@@ -1651,6 +1651,16 @@ class Behavior:
                                len([c for c in self.memory.clicks if now - c < 3.0]) >= 3,
                                idle_seconds=self.user_idle_seconds,
                                curious=self.emotion.current in (Emotion.CURIOUS,))
+
+    FOLLOWUPS = {"quad": ("SNIFF", "LOOK_AROUND", "STRETCH", "BOUNCE", "CURIOUS", "LOOK_UP"),
+                 "biped": ("LOOK_AROUND", "STRETCH", "CURIOUS", "LOOK_UP", "BOUNCE", "NOD")}
+
+    def followup_steps(self) -> list[tuple]:
+        """A random little activity to flow into right after a greeting, so a wave never turns into
+        standing there waving (the brain's next idle choice can take a few seconds)."""
+        pool = self.FOLLOWUPS["biped" if self.species in ("buddy", "robot") else "quad"]
+        ready = [n for n in pool if self.actions.ready(n, self._now())] or list(pool)
+        return [("action", self.life_rng.choice(ready), None, Priority.IDLE)]
 
     def variant(self, name: str) -> str:
         """One of the action's variants, chosen by personality, mood and energy."""

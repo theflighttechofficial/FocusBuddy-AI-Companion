@@ -328,6 +328,12 @@ class CharacterAsset:
                     a.issues.append(f"LOD {lod} not loaded: {e}")
         if refine != "none":
             a._apply_refine(folder, geometry_only=refine == "geometry")
+        try:
+            grow = float(meta.get("head_grow", 1.0) or 1.0)
+        except (TypeError, ValueError):
+            grow = 1.0
+        if abs(grow - 1.0) > 1e-3:
+            a._grow_head(max(0.7, min(2.0, grow)))
         if meta.get("hand_zone"):
             for m in a.lods.values():
                 a._clean_arm_weights(m)
@@ -350,6 +356,65 @@ class CharacterAsset:
                 except Exception as e:  # noqa: BLE001
                     a.issues.append(f"animation file {p.name} not loaded: {e}")
         return a
+
+    # neck span (0 = Neck joint, 1 = Head joint) over which a grown head blends into the body
+    HEAD_GROW_FROM, HEAD_GROW_TO = 0.0, 0.75
+
+    def head_grow_weight(self, pts: np.ndarray) -> np.ndarray:
+        """0..1 per point: how much of the head growth applies there (bind pose, internal units).
+        Full above ~3/4 of the neck, nothing at the neck's base and below - so shoulders, collar and
+        long hair hanging down the back keep their size and the neck tapers smoothly into the head."""
+        hi, ni = self.joint_index("Head"), self.joint_index("Neck")
+        H = self.joints[hi].bind_world[:3, 3]
+        N = self.joints[ni].bind_world[:3, 3]
+        ax = H - N
+        L = float(np.linalg.norm(ax))
+        h = (np.asarray(pts, dtype=float) - N) @ (ax / L) / L
+        u = np.clip((h - self.HEAD_GROW_FROM) / (self.HEAD_GROW_TO - self.HEAD_GROW_FROM), 0.0, 1.0)
+        return u * u * (3.0 - 2.0 * u)
+
+    def _grow_head(self, k: float) -> None:
+        """metadata ``head_grow``: a bigger head (``k`` x) baked into the bind pose.
+
+        The skeleton's head joints scale uniformly about the Head joint (bind matrices, the rest
+        translations the clips use, the inverse binds), and so does every vertex above the neck;
+        down the neck the growth fades out smoothly. Unlike the runtime ``head_scale`` (which
+        follows the skin weights), hair or a collar weighted partly to the head never stretches or
+        flares out: what decides is where a vertex is, not what it is weighted to."""
+        hi, ni = self.joint_index("Head"), self.joint_index("Neck")
+        if hi < 0 or ni < 0 or not self.lods:
+            self.issues.append("head_grow needs Head and Neck joints - skipped")
+            return
+        H = self.joints[hi].bind_world[:3, 3].copy()
+        if float(np.linalg.norm(H - self.joints[ni].bind_world[:3, 3])) < 1e-6:
+            return
+        # 1. joints below the Head joint: uniform scale about it
+        kids = [i for i in range(len(self.joints)) if i != hi and self._descends(i, hi)]
+        for i in kids:
+            j = self.joints[i]
+            bw = np.array(j.bind_world, dtype=float, copy=True)
+            bw[:3, 3] = H + k * (bw[:3, 3] - H)
+            j.bind_world = bw
+            j.inverse_bind = np.linalg.inv(bw)
+            if j.ibm is not None:
+                j.ibm = j.inverse_bind @ self._C        # inverse of the asset-space bind (C^-1 @ bind)
+            if j.rest_t is not None:
+                j.rest_t = np.asarray(j.rest_t, dtype=float) * k
+        # 2. vertices and morph deltas: the same scale, fading out down the neck
+        for m in self.lods.values():
+            s = 1.0 + (k - 1.0) * self.head_grow_weight(m.positions)
+            m.positions = H + (m.positions - H) * s[:, None]
+            for name, d in list(m.morphs.items()):
+                m.morphs[name] = np.asarray(d, dtype=float) * s[:, None]
+        self.head_grown = k
+
+    def _descends(self, i: int, ancestor: int) -> bool:
+        p = self.joints[i].parent
+        while p >= 0:
+            if p == ancestor:
+                return True
+            p = self.joints[p].parent
+        return False
 
     def _apply_refine(self, folder: Path, geometry_only: bool = False) -> None:
         """Bake-time realism data from ``refine.npz`` (``tools/refine/bake_ao.py`` and

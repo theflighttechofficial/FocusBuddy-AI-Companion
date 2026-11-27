@@ -559,6 +559,7 @@ class MeshRenderer3D(Renderer3D):
         head_R = self.head_rotation(pose, rp, yaw)
         self._apply_clip(pose)
         self._update_face(pose, state)
+        self.driver.view = cam                  # gestures are placed on screen (people's hands)
         Msk = self.driver.pose(pose, rp, head_R)
         self._ground_clamp(mesh, Msk)
         mw = self.morph_weights(pose)

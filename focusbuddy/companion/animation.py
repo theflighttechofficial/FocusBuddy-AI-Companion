@@ -35,7 +35,7 @@ import random
 from dataclasses import dataclass, fields, replace
 from typing import Optional
 
-from .gait import FOOT_EVENT, FootPhaseSystem
+from .gait import FOOT_EVENT, FootPhaseSystem, hop_flight, hop_stance
 from .profile import CharacterProfile, get_profile
 from .rig import Rig, apply_constraints, skeleton_for_profile
 from .secondary import SecondarySystem
@@ -732,8 +732,10 @@ class AnimationController:
             cycle = loco.phase / (2 * math.pi)
             level = getattr(loco, "gait_level", 2.0 * loco.run_blend)
             facing = 1 if loco.facing_blend >= 0 else -1
-            air_lift = 2.0 if self.profile.gait == "hop" else 4.0
-            airborne = bool(loco.airborne) or out.lift > air_lift or out.hop > 0.5
+            # the hop gait's own flight is part of the stride (the feet keep swinging); only real
+            # jumps / falls count as airborne here (the gait lift used to freeze every paw in place)
+            body_lift = out.lift - (getattr(out, "gait_lift", 0.0) if self.profile.gait == "hop" else 0.0)
+            airborne = bool(loco.airborne) or body_lift > 4.0 or out.hop > 0.5
             out.ground = getattr(loco, "ground_dy", 0.0) * units
         else:
             odo, stride_u, cycle, level, facing = self._odo_cache if hasattr(self, "_odo_cache") else (0.0, 30.0, 0.0, 0.0, 1)
@@ -763,6 +765,13 @@ class AnimationController:
                 neutral = rig.neutral_feet(out, lay)
                 reach = rig.stance_reach(out, lay)
         frame = self.feet.update(dt, now, cycle, level, stride_u, odo, moving_w, neutral, reach, facing, airborne)
+        gl = getattr(out, "gait_lift", 0.0)
+        if self.profile.gait == "hop" and gl > 0.05 and not airborne:
+            # in the hop's flight the paws travel with the body (legs reach / trail, they don't
+            # stretch down to the floor); planted paws stay on the ground
+            for f_, (tx, ty) in list(frame.targets.items()):
+                if not frame.contacts.get(f_, False):
+                    frame.targets[f_] = (tx, ty - gl * 0.85)
         for ev, foot in frame.events:
             self.events.append((ev, foot))
         self._support = frame.support
@@ -818,11 +827,21 @@ class AnimationController:
             p.leg_amp = (amp_deg / 24.0) * moving_w
             p.foot_lift = (0.8 + 0.5 * rb) * moving_w
             if prof.gait == "hop":
-                hop = max(0.0, math.sin(phi))
-                p.gait_lift = hop * (6 + 4 * level) * moving_w
+                # the body rises only while no paw is planted (push-off -> arc -> front paws land):
+                # it used to peak mid-stance, which stretched the planted legs straight and froze them
+                f = hop_flight(g, phi / (2 * math.pi))
+                arc = math.sin(math.pi * f) if f >= 0.0 else 0.0
+                p.gait_lift = arc * (5 + 4 * level) * moving_w
                 p.lift += p.gait_lift
-                p.tilt += -math.cos(phi) * (4 + level) * moving_w * k
-                p.squash += (0.22 if hop < 0.08 else -0.08 - 0.03 * level) * moving_w * self.physics
+                # nose up on the way up, nose down reaching for the landing, level on the ground
+                p.tilt += (-math.sin(2 * math.pi * f) * (6 + 2 * level) if f >= 0.0 else 0.0) * moving_w * k
+                if f < 0.0:      # on the ground: the hind legs gather under the body (a little squash)
+                    gather = math.sin(math.pi * max(0.0, hop_stance(g, phi / (2 * math.pi))))
+                    p.squash += 0.16 * gather * moving_w * self.physics
+                    p.flex += -0.5 * gather * moving_w
+                else:            # stretched out in the air
+                    p.squash += (-0.06 - 0.03 * level) * arc * moving_w * self.physics
+                    p.flex += 0.6 * arc * moving_w
             else:
                 # body bob follows real foot support: vaulting walk, compressing run
                 dev = self._support - self._support_mean

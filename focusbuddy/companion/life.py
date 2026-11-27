@@ -264,9 +264,10 @@ WAKE_FLOURISH = {
     "rabbit": [("EAR_TWITCH", None), ("NOSE_TWITCH", None)],         # ears twitch before a hop
     "fox": [("LOOK_AROUND", 1.4), ("PEEK_BEHIND", None)],            # cautious
     "robot": [("BOOT", None), ("SYSTEM_CHECK", None)],               # boots up with blinking lights
-    "buddy": [("STRETCH", None), ("SHAKE_HEAD", None), ("WAVE", None)],   # gets up, fixes hair, waves
-    "girl": [("STRETCH", None), ("SHAKE_HEAD", None), ("WAVE", None)],
-    "saree": [("STRETCH", None), ("SHAKE_HEAD", None), ("WAVE", None)],
+    # gets up, fixes hair, looks around (the hello wave comes once, on the way in - not twice)
+    "buddy": [("STRETCH", None), ("SHAKE_HEAD", None), ("LOOK_AROUND", 1.2)],
+    "girl": [("STRETCH", None), ("SHAKE_HEAD", None), ("LOOK_AROUND", 1.2)],
+    "saree": [("STRETCH", None), ("SHAKE_HEAD", None), ("LOOK_AROUND", 1.2)],
 }
 EXIT_FLOURISH = {"cat": "TAIL_SWISH", "dog": "TAIL_WAG", "rabbit": "EAR_TWITCH", "fox": "SMUG",
                  "robot": "SYSTEM_CHECK", "buddy": "WAVE", "girl": "WAVE", "saree": "WAVE"}
@@ -1202,8 +1203,8 @@ def g_wave_hello(L_: Life):
     def wait():
         L_.awaiting_user_until = L_._now() + 25.0
         L_.awaiting_gag = "wave_hello"
-    return [("look", A.USER, None, 0.8, S.IDLE), ("action", "WAVE", None, P_I), ("call", wait),
-            ("look", A.USER, None, 2.0, S.SITTING)]
+    # one quick wave, then straight on to something else (it no longer stands there waiting)
+    return [("look", A.USER, None, 0.5, S.IDLE), ("action", "WAVE", None, P_I), ("call", wait)] +         L_.b.followup_steps()
 
 
 def g_bring_gift(L_: Life):

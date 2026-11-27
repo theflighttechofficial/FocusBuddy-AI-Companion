@@ -18,8 +18,23 @@ All notable changes to FocusBuddy. Full engineering notes for each release are i
   0.2 s instead of appearing as a one-frame cut. Continuous motion passes through unchanged.
   Planted legs are excluded, so feet never slide.
 - A `tests/` suite (the CI job ran `pytest` with no tests).
+- **Bigger heads for the people**: Study Buddy, Study Girl and Saree Girl have heads 1.5× larger.
+  The growth is baked into the model at load (`"head_grow": 1.5` in their `metadata.json`). It fades
+  out smoothly down the neck, so shoulders, collars and long hair keep their size and nothing
+  stretches. Their face rig, motion capture and every level of detail follow the new head.
+- **Natural hand gestures for the people**: the hello wave lifts the elbow first, then swings the
+  forearm from the elbow beside the head, with a loose wrist. Clapping hands visibly meet and part
+  in front of the chest, pointing reaches out across the screen, and thumbs-up is held with a bent
+  elbow. Gestures are placed for the 3/4 view, so they no longer point at the camera or cover the
+  face. The robot waves out wide at shoulder height, which suits its short arms.
+- **A real rabbit hop**: the front paws land, the hind feet swing up under the body, the hind legs
+  push off and the rabbit arcs through the air, nose up and then nose down. Before, its legs
+  stayed nearly locked straight and it shuffled in place.
 
 ### Fixed
+- Switching companions left the new one **waving forever**. Every hello wave now lasts about
+  1 second and flows straight into another activity. People no longer wave at nobody when they
+  pick a "happy wag" idle.
 - **Walk judder on Windows**: animation used `time.monotonic()`, which only ticks every 15.6 ms on
   Windows. Frame deltas jumped between 0, 15 and 31 ms. All timing now uses `time.perf_counter()`.
 - **Blink and talk hitches**: every blink or mouth frame re-uploaded the whole 2048–4096 px face

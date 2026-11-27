@@ -56,12 +56,37 @@ QUAD = (
     GaitDef("RUN", {"FL": 0.0, "FR": 0.1, "BL": 0.5, "BR": 0.6}, 0.34, 7.0, 3.0, 8.0, 1.0, -1.0),
     GaitDef("SPRINT", {"FL": 0.0, "FR": 0.08, "BL": 0.5, "BR": 0.58}, 0.26, 8.0, 3.6, 12.0, 1.25, -1.0),
 )
+# a rabbit's hop (a half-bound): the front paws land first (cycle 0), the hind feet swing up under the
+# body and land beside / ahead of them while the front paws lift, the hind legs push off - and the
+# rest of the cycle is flight (see ``hop_flight``: the body only rises while no paw is planted)
 HOP = (
-    GaitDef("HOP", {"FL": 0.0, "FR": 0.04, "BL": 0.85, "BR": 0.89}, 0.32, 4.0, 1.0, 2.0, 0.3, -1.0),
-    GaitDef("HOP_JOG", {"FL": 0.0, "FR": 0.04, "BL": 0.85, "BR": 0.89}, 0.28, 5.0, 1.2, 3.0, 0.5, -1.0),
-    GaitDef("BOUND", {"FL": 0.0, "FR": 0.05, "BL": 0.82, "BR": 0.87}, 0.24, 6.0, 1.4, 6.0, 0.9, -1.0),
-    GaitDef("SPRINT", {"FL": 0.0, "FR": 0.05, "BL": 0.8, "BR": 0.85}, 0.2, 7.0, 1.6, 10.0, 1.1, -1.0),
+    GaitDef("HOP", {"FL": 0.0, "FR": 0.96, "BL": 0.78, "BR": 0.75}, 0.30, 4.0, 1.0, 2.0, 0.3, -1.0),
+    GaitDef("HOP_JOG", {"FL": 0.0, "FR": 0.96, "BL": 0.8, "BR": 0.77}, 0.27, 5.0, 1.2, 3.0, 0.5, -1.0),
+    GaitDef("BOUND", {"FL": 0.0, "FR": 0.95, "BL": 0.82, "BR": 0.79}, 0.23, 6.0, 1.4, 6.0, 0.9, -1.0),
+    GaitDef("SPRINT", {"FL": 0.0, "FR": 0.95, "BL": 0.84, "BR": 0.81}, 0.2, 7.0, 1.6, 10.0, 1.1, -1.0),
 )
+
+
+def _hop_takeoff(g: "GaitDef") -> float:
+    offs = [g.offsets.get(k, 0.0) for k in ("BL", "BR")]
+    return min(0.92, max(((1.0 - o) % 1.0) + g.duty for o in offs))
+
+
+def hop_flight(g: "GaitDef", cycle: float) -> float:
+    """Flight position of a hop at ``cycle``: -1 while paws are on the ground, 0..1 through the
+    airborne part (it starts when the last hind foot pushes off, ends when the front paws land)."""
+    c = cycle % 1.0
+    start = _hop_takeoff(g)
+    if c < start:
+        return -1.0
+    return (c - start) / max(1e-3, 1.0 - start)
+
+
+def hop_stance(g: "GaitDef", cycle: float) -> float:
+    """Position through the ground part of a hop (0 front paws land .. 1 push-off), -1 in flight."""
+    c = cycle % 1.0
+    start = _hop_takeoff(g)
+    return c / start if c < start else -1.0
 BIPED = (
     GaitDef("WALK", {"L": 0.0, "R": 0.5}, 0.62, 3.8, 1.3, 0.0, 0.0, 1.0),
     GaitDef("JOG", {"L": 0.0, "R": 0.5}, 0.42, 6.0, 2.0, 4.0, 0.0, -0.6),

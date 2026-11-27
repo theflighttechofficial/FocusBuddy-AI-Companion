@@ -1331,7 +1331,12 @@ class FocusBuddyApp(QObject):
         self._refresh_tray()
         if self.dashboard:
             self.dashboard.refresh_character()
-        self.companion.perform(S.WAVING, 1.6, then_home=False)
+        # a quick hello, then back to its own life (then_home=False left it waving forever)
+        from .companion.actions import Priority
+        b = self.companion.behavior
+        if b.mode != "held":
+            b._start_plan([("state", S.WAVING, 1.1)] + b.followup_steps(), mode="auto",
+                          priority=Priority.INTERACTION)
         self._say("GREETING")
 
     def reload_rules(self) -> None:

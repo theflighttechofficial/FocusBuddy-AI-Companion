@@ -1138,13 +1138,228 @@ class RigDriver:
         fields = self.ARM_FIELDS
         gest = self.kind == "biped" and getattr(self.animator, "mocap", False)
         if gest:
-            fields = tuple(f for f in fields if f not in ("clap", "point", "thumb", "beckon"))
+            waving = self._wave_weight(pose) > 0.0
+            fields = tuple(f for f in fields if f not in ("clap", "point", "thumb", "beckon") and
+                           not (waving and f == "paw"))
             try:
                 self._clip_arm_fields(D, T, pose, rp, tg, fields)
             finally:
-                self._clip_gestures(D, T, pose)       # the gesture wins over the generic arm pose
+                self._human_gestures(D, T, pose)      # the gesture wins over the generic arm pose
             return
         self._clip_arm_fields(D, T, pose, rp, tg, fields)
+
+    # ------------------------------------------------------------------ people's hands (2.4)
+    # Natural arm gestures for the motion-capture people (internal frame: +x forward, +y down,
+    # z sideways). Each gesture is a hand target, an elbow direction and a path: the hand travels
+    # on a curve through a "lead" point instead of swinging a straight arm, and targets sit well
+    # inside the arm's reach so the elbow always bends like a real one. Targets that must read in
+    # the 3/4 view (the wave, the point) are placed on screen: the body's sideways axis points
+    # mostly at the camera there. The wave swings the forearm from the elbow with a lagging,
+    # loose wrist; the chest leans a little away from the waving arm.
+    WAVE_HZ = 2.6
+    WAVE_DEG = 24.0
+
+    def _wave_weight(self, pose) -> float:
+        """0..1 while a hello wave plays (the WAVING state / WAVE action), easing out after it."""
+        paw = max(0.0, min(1.0, float(getattr(pose, "paw", 0.0))))
+        st = str(getattr(pose, "state", "")).upper()
+        act = str(getattr(pose, "action", "") or "").upper()
+        starting = st == "WAVING" or act in ("WAVE", "HELLO")
+        if getattr(self, "_hwave_arm", ""):
+            if paw <= 0.01:
+                self._hwave_arm = ""
+                return 0.0
+            return paw
+        if starting and paw > 0.02:
+            return paw
+        return 0.0
+
+    def _near_arm(self, pose, T=None) -> str:
+        """The arm nearer the viewer (gestures read in the 3/4 view)."""
+        V = getattr(self, "view", None)
+        if V is not None and T is not None:
+            zl = [float(np.asarray(V)[2] @ T[self.canon[b]]) for b in ("LeftUpperArm", "RightUpperArm")
+                  if b in self.canon]
+            if len(zl) == 2:
+                return "arm_L" if zl[0] > zl[1] else "arm_R"        # larger camera z = nearer
+        return "arm_R" if float(getattr(pose, "turn", 1.0)) >= 0.0 else "arm_L"
+
+    def _screen_axes(self, T, up: int):
+        """(out, up, toward) in model space: screen-sideways away from the body on this arm's side,
+        screen-up and toward the viewer. Falls back to the body frame without a camera."""
+        V = getattr(self, "view", None)
+        side_z = 1.0 if float(self.B[up][2]) >= 0.0 else -1.0
+        if V is None:
+            return np.array([0.0, 0.0, side_z]), np.array([0.0, -1.0, 0.0]), np.array([1.0, 0.0, 0.0])
+        V = np.asarray(V, dtype=float)
+        right, down, toward = V[0] / np.linalg.norm(V[0]), V[1] / np.linalg.norm(V[1]), V[2] / np.linalg.norm(V[2])
+        chest = self.canon.get("Chest", self.canon.get("Spine", -1))
+        c = T[chest] if chest >= 0 else T[up] - np.array([0.0, 0.0, side_z])
+        sgn = 1.0 if float((T[up] - c) @ right) >= 0.0 else -1.0
+        return right * sgn, -down, toward
+
+    def _arm_chain(self, name: str):
+        up, lo, end = (self.canon.get(b, -1) for b in LIMB_BONES["biped"][name])
+        if min(up, lo, end) < 0:
+            return None
+        l1 = float(np.linalg.norm(self.B[lo] - self.B[up]))
+        l2 = float(np.linalg.norm(self.B[end] - self.B[lo]))
+        side = 1.0 if float(self.B[up][2]) >= 0.0 else -1.0
+        return up, lo, end, l1 + l2, side
+
+    def _ik_pole(self, D, T, up: int, lo: int, end: int, goal: np.ndarray, pole: np.ndarray) -> None:
+        """Two-bone IK toward ``goal`` with the elbow bending toward ``pole`` (a direction)."""
+        root = T[up].copy()
+        l1 = float(np.linalg.norm(self.B[lo] - self.B[up]))
+        l2 = float(np.linalg.norm(self.B[end] - self.B[lo]))
+        if l1 < 1e-6 or l2 < 1e-6:
+            return
+        jnt, eff, _ = two_bone_ik_3d(tuple(root), tuple(goal), l1, l2, tuple(pole), 165.0)
+        jnt, eff = np.array(jnt), np.array(eff)
+        self._rotate(D, T, up, rotation_between(T[lo] - root, jnt - root))
+        self._rotate(D, T, lo, rotation_between(T[end] - T[lo], eff - T[lo]))
+
+    def _gesture_arm(self, D, T, name: str, w: float, target, lead, pole, pole_late: bool = False) -> bool:
+        """Blend one arm (weight ``w`` 0..1) from its animated pose to a gesture: the hand follows a
+        quadratic curve rest -> lead -> target, the elbow turns from its animated direction toward
+        ``pole`` (late: mostly at the end). ``target`` / ``lead`` / ``pole`` are callables of
+        (root, L, side)."""
+        ch = self._arm_chain(name)
+        if ch is None or w <= 1e-3:
+            return False
+        up, lo, end, L, side = ch
+        root = T[up].copy()
+        e = w * w * (3.0 - 2.0 * w)
+        rest = T[end].copy()
+        tgt = target(root, L, side)
+        mid = lead(root, L, side) if lead is not None else (rest + tgt) * 0.5
+        goal = (1 - e) ** 2 * rest + 2 * (1 - e) * e * mid + e * e * tgt
+        cur = T[lo] - (root + T[end]) * 0.5
+        cn = float(np.linalg.norm(cur))
+        pw = np.asarray(pole(root, L, side), dtype=float)
+        pw = pw / max(1e-9, float(np.linalg.norm(pw)))
+        ep = e * e if pole_late else e
+        pdir = (cur / cn if cn > 1e-6 else pw) * (1.0 - ep) + pw * ep
+        self._ik_pole(D, T, up, lo, end, goal, pdir)
+        return True
+
+    def _human_gestures(self, D, T, pose) -> None:
+        g = lambda f: max(0.0, min(1.0, float(getattr(pose, f, 0.0))))   # noqa: E731
+        clock = float(getattr(pose, "clock", 0.0))
+        near = self._near_arm(pose, T)
+        # ---- hello wave
+        ww = self._wave_weight(pose)
+        if ww > 0.0:
+            if not getattr(self, "_hwave_arm", ""):
+                self._hwave_arm = near                       # chosen once per wave, never swapped mid-wave
+            arm = self._hwave_arm
+            ch = self._arm_chain(arm)
+            if ch is not None:
+                up, lo, end, L, side = ch
+                e = ww * ww * (3.0 - 2.0 * ww)
+                chest = self.canon.get("Chest", self.canon.get("Spine", -1))
+                if chest >= 0:                               # lean a touch away from the raised arm
+                    self._rotate(D, T, chest, axis_angle((1.0, 0.0, 0.0), math.radians(-side * 3.5 * e)))
+                # placed on screen: the hand beside the head on its own side, a little toward the viewer
+                o_, u_, f_ = self._screen_axes(T, up)
+                # short arms under a big head (the robot) wave out wide at shoulder height instead -
+                # beside the head they would cover the face
+                short = self.species == "robot"
+                ok = self._gesture_arm(
+                    D, T, arm, ww,
+                    # (out past the big cartoon head, up at ear height; still well inside the reach,
+                    # so the elbow keeps a natural ~65 deg bend)
+                    target=lambda r, L_, s: r + ((0.86 * o_ + 0.24 * u_ + 0.10 * f_) if short else
+                                                 (0.62 * o_ + 0.52 * u_ + 0.12 * f_)) * L_,
+                    # the elbow flexes first (the hand comes up in front of the shoulder), then the
+                    # upper arm swings out - never a straight arm swinging up through a T-pose
+                    lead=lambda r, L_, s: r + (0.22 * o_ + 0.10 * u_ + 0.30 * f_) * L_,
+                    pole=lambda r, L_, s: o_ - 0.4 * u_ - 0.25 * f_,   # ends pointing out (the arm lifted)
+                    pole_late=True)
+                if ok:
+                    osc = max(0.0, min(1.0, (e - 0.65) / 0.35))
+                    osc = osc * osc * (3.0 - 2.0 * osc)
+                    if osc > 0.0:
+                        ph = 2.0 * math.pi * self.WAVE_HZ * clock
+                        fwd = f_                         # the hand swings side to side in the screen plane
+                        self._rotate(D, T, lo, axis_angle(fwd, math.radians(self.WAVE_DEG * math.sin(ph) * osc)))
+                        # the wrist is loose: it trails the forearm a little
+                        self._rotate(D, T, end, axis_angle(fwd, math.radians(
+                            0.45 * self.WAVE_DEG * math.sin(ph - 1.1) * osc)))
+        # ---- clap: both hands meet well in front of the chest, elbows out, a steady rhythm; they
+        # part along a mix of the body's side axis and the screen's (pure body-sideways points at the
+        # camera in the 3/4 view, and the clap could not be seen)
+        clap = g("clap")
+        if clap > 0.0:
+            arms = [a for a in ("arm_L", "arm_R") if self._arm_chain(a) is not None]
+            if len(arms) == 2:
+                sh = [T[self._arm_chain(a)[0]] for a in arms]
+                ctr = (sh[0] + sh[1]) * 0.5
+                Lm = sum(self._arm_chain(a)[3] for a in arms) * 0.5
+                V = getattr(self, "view", None)
+                lat = sh[1] - sh[0]
+                lat = lat / max(1e-9, float(np.linalg.norm(lat)))
+                if V is not None:
+                    right = np.asarray(V, dtype=float)[0]
+                    right = right / max(1e-9, float(np.linalg.norm(right)))
+                    if float(right @ lat) < 0.0:
+                        right = -right
+                    lat = lat + right
+                    lat = lat / max(1e-9, float(np.linalg.norm(lat)))
+                beat = 0.5 + 0.5 * math.cos(2.0 * math.pi * 2.2 * clock)       # 1 = apart, 0 = together
+                gap = (0.03 + 0.17 * beat ** 1.5) * Lm
+                hub = ctr + np.array([0.62 * Lm, 0.50 * Lm, 0.0])
+                for a, sgn in zip(arms, (-1.0, 1.0)):
+                    self._gesture_arm(
+                        D, T, a, clap,
+                        target=lambda r, L_, s, sg=sgn: hub + lat * sg * gap,
+                        lead=lambda r, L_, s: r + np.array([0.30 * L_, 0.55 * L_, -s * 0.04 * L_]),
+                        pole=lambda r, L_, s: np.array([-0.35, 0.8, s * 0.9]))
+        # ---- point: the near arm points out across the screen, not at the camera
+        point = g("point")
+        if point > 0.0:
+            ch = self._arm_chain(near)
+            if ch is not None:
+                # out across the screen on the arm's own side (at something over there), a little toward
+                # the viewer - a point straight ahead aimed at the camera in the 3/4 view
+                o_, u_, f_ = self._screen_axes(T, ch[0])
+                aim = 0.80 * o_ + 0.06 * u_ + 0.16 * f_
+                self._gesture_arm(
+                    D, T, near, point,
+                    target=lambda r, L_, s: r + aim * L_,
+                    lead=lambda r, L_, s: r + (0.25 * o_ - 0.35 * u_ + 0.25 * f_) * L_,
+                    pole=lambda r, L_, s: -u_ - 0.4 * f_)
+        # ---- thumbs up: elbow bent at the side, fist in front at chest height
+        thumb = g("thumb")
+        if thumb > 0.0:
+            self._gesture_arm(
+                D, T, near, thumb,
+                target=lambda r, L_, s: r + np.array([0.40 * L_, 0.26 * L_, s * 0.20 * L_]),
+                lead=lambda r, L_, s: r + np.array([0.15 * L_, 0.55 * L_, s * 0.28 * L_]),
+                pole=lambda r, L_, s: np.array([-0.35, 1.0, s * 0.55]))
+        # ---- beckon: palm up in front, the forearm curling in ("come here")
+        beckon = g("beckon")
+        if beckon > 0.0:
+            curl = 0.10 * math.sin(math.radians(float(getattr(pose, "paw_wave", 0.0))) * 3.0)
+            self._gesture_arm(
+                D, T, near, beckon,
+                target=lambda r, L_, s: r + np.array([(0.46 - curl) * L_, (0.22 - 0.6 * curl) * L_, s * 0.28 * L_]),
+                lead=lambda r, L_, s: r + np.array([0.2 * L_, 0.5 * L_, s * 0.3 * L_]),
+                pole=lambda r, L_, s: np.array([-0.3, 1.0, s * 0.5]))
+        # ---- fist pump (kept from the rig path): the near fist punches up, the other on the hip
+        pump = g("paw") if g("fists") > 0.5 else 0.0
+        if pump > 0.0 and ww <= 0.0:
+            sh = [T[self.canon[b]][2] for b in ("LeftUpperArm", "RightUpperArm") if b in self.canon]
+            mid_z = sum(sh) / len(sh) if sh else 0.0
+            for arm in ("arm_L", "arm_R"):
+                ch = self._arm_chain(arm)
+                if ch is None:
+                    continue
+                up, lo, end, L, side = ch
+                w, goal = self._expressive_arm("arm_R" if arm == near else "arm_L", pose, T[up].copy(), side, L,
+                                               mid_z, pump)
+                if goal is not None and w > 0.0:
+                    self._ik_limb(D, T, up, lo, end, T[end] + (goal - T[end]) * min(1.0, w * 1.2))
 
     def _clip_arm_fields(self, D, T, pose, rp: RigPose, tg: dict, fields) -> None:
         strength = max(float(getattr(pose, f, 0.0)) for f in fields)

@@ -39,6 +39,9 @@ This update makes the companion and the app fluid, especially on Windows laptops
 | Opening the dashboard | Over 20 seconds on the first open | About 1.5 seconds |
 | Slow or older PCs | Quality only went down, never back up | Detects your hardware and adjusts detail live, both ways |
 | Laptops on battery | Same work as when plugged in | Follows Windows battery saver automatically |
+| Saying hello | Could keep waving forever after a companion switch | One quick wave, then on to something else |
+| The rabbit | Stiff legs that shuffled in place | Real hops: push off, arc through the air, land |
+| The people | Small heads, stiff straight-arm gestures | 1.5× heads, natural waves, claps and pointing |
 
 See the [changelog](CHANGELOG.md) for the full list.
 
@@ -60,6 +63,8 @@ It asks before it acts. It says *"Hey… I think we wandered off task. Want to g
 - Eight rigged, textured **3D characters**: cat, dog, fox, rabbit, robot, Study Buddy, Study Girl and Saree Girl. Each has its own personality, gait and dialogue.
 - Walks, jogs, runs, sprints, sits, sleeps, stretches and plays, with planted feet, IK and spring physics on tails and ears.
 - **No cuts between moves.** Any sudden change in a pose eases in over about 0.2 seconds instead of popping. Planted feet stay where they are.
+- **Natural hands for the people.** Waves lift the elbow first and swing from it, claps really clap, and every gesture is placed so it reads from the desktop's 3/4 view. Their big, expressive heads (1.5× the original) blend smoothly into the neck.
+- **A rabbit that hops like a rabbit**, with a push-off, a flight and a landing.
 - 25 emotions, read from body language and faces that blink, squint and smile.
 - A daily routine: it wakes up, wanders, gets into mischief, leaves and comes back, and remembers you between launches.
 - Click, drag, pet or poke it. Resize it with **Ctrl + mouse wheel**, from small up to a quarter of your screen.

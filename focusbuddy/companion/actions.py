@@ -1734,7 +1734,7 @@ _ACTIONS = [
     A("EXCITED_JUMP", "species", p_excited_jump, motion="jump", duration=0.9, cooldown=20, priority=P.INTERACTION,
       species=frozenset({"dog"}), energy=4, emotion="EXCITED", exits=(0.0, 1.0)),
     # ---------------------------------------------------------------- social
-    A("WAVE", "social", None, state=S.WAVING, duration=1.6, priority=P.INTERACTION, emotion="HAPPY", tags={"social"}),
+    A("WAVE", "social", None, state=S.WAVING, duration=1.1, priority=P.INTERACTION, emotion="HAPPY", tags={"social"}),
     A("LOOK_AT_USER", "social", p_look_user, track="upper", duration=1.5, tags={"social", "focus"}, weight=4),
     A("NOD", "social", p_nod, track="additive", duration=1.0, tags={"social", "focus"}),
     A("SHAKE_HEAD", "social", p_shake_head, track="upper", duration=1.1),
@@ -1827,7 +1827,7 @@ SUBSTITUTE: dict[tuple[str, str], str] = {
     ("robot", "SCRATCH"): "RECALIBRATE", ("buddy", "SCRATCH"): "THINK",
     ("robot", "SCRATCH_EAR"): "RECALIBRATE", ("buddy", "SCRATCH_EAR"): "THINK",
     ("robot", "SHAKE"): "RECALIBRATE", ("buddy", "SHAKE"): "STRETCH",
-    ("robot", "TAIL_WAG"): "HEAD_ROTATION", ("buddy", "TAIL_WAG"): "WAVE", ("rabbit", "TAIL_WAG"): "NOSE_TWITCH",
+    ("robot", "TAIL_WAG"): "HEAD_ROTATION", ("buddy", "TAIL_WAG"): "HAPPY", ("rabbit", "TAIL_WAG"): "NOSE_TWITCH",
     ("robot", "TAIL_SWISH"): "PROCESSING", ("buddy", "TAIL_SWISH"): "NOD", ("rabbit", "TAIL_SWISH"): "NOSE_TWITCH",
     ("robot", "TAIL_SWING"): "HEAD_ROTATION", ("buddy", "TAIL_SWING"): "NOD", ("rabbit", "TAIL_SWING"): "EAR_TWITCH",
     ("robot", "ROLL"): "SPIN", ("buddy", "ROLL"): "SPIN",

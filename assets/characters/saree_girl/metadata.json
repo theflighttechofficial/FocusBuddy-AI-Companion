@@ -102,5 +102,6 @@
     "side": 7.0,
     "depth": 0.6,
     "knee_band": 8.0
-  }
+  },
+  "head_grow": 1.5
 }
